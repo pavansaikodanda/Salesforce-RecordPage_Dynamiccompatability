@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Required_Layout__c</fullName>
+    <label>Is Required Layout</label>
+    <type>Checkbox</type>
+    <defaultValue>false</defaultValue>
+    <inlineHelpText>From layout sync</inlineHelpText>
+</CustomField>
