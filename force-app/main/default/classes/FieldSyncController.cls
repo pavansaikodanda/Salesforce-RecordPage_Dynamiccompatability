@@ -1,5 +1,10 @@
 public class FieldSyncController {
 
+    private static final Set<String> SYSTEM_FIELD_EXCLUSIONS = new Set<String>{
+        'id', 'createddate', 'createdbyid', 'lastmodifieddate', 'lastmodifiedbyid',
+        'systemmodstamp', 'isdeleted', 'lastactivitydate', 'lastvieweddate', 'lastreferenceddate'
+    };
+
     @AuraEnabled
     public static FormWrappers.SyncResultWrapper syncFields(String objectMappingId) {
         Custom_Object_Mapping__c mapping = [
@@ -68,6 +73,20 @@ public class FieldSyncController {
         Integer unchanged = 0;
 
         for (String fieldName : incomingFields) {
+            // Skip system fields that are never writable
+            if (SYSTEM_FIELD_EXCLUSIONS.contains(fieldName.toLowerCase())) continue;
+
+            Schema.SObjectField sof = schemaFields.get(fieldName.toLowerCase());
+            if (sof != null) {
+                Schema.DescribeFieldResult dfr = sof.getDescribe();
+                // Skip formula, encrypted, auto-number, polymorphic name, and non-writable fields
+                if (dfr.isCalculated()) continue;
+                if (dfr.getType() == Schema.DisplayType.EncryptedString) continue;
+                if (dfr.isAutoNumber()) continue;
+                if (dfr.isNamePointing()) continue;
+                if (!dfr.isUpdateable() && !dfr.isCreateable()) continue;
+            }
+
             if (existingByApiName.containsKey(fieldName)) {
                 unchanged++;
             } else {
@@ -75,7 +94,6 @@ public class FieldSyncController {
                 String referenceTo = null;
                 Boolean isRequired = false;
 
-                Schema.SObjectField sof = schemaFields.get(fieldName.toLowerCase());
                 if (sof != null) {
                     Schema.DescribeFieldResult dfr = sof.getDescribe();
                     fieldType = dfr.getType().name();
