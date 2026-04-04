@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>Tooling_API_Named_Credential</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tooling API Named Credential Name</shortDescription>
+        <value>Tooling_API</value>
+    </labels>
+</CustomLabels>
