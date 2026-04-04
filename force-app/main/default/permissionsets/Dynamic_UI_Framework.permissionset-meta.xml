@@ -4,6 +4,12 @@
     <hasActivationRequired>false</hasActivationRequired>
     <description>Grants access to all Custom Object Mapping, Field Mapping, Stage Config, Path Mapping, and Transition objects used by the Dynamic UI Framework.</description>
 
+    <!-- Custom Permission -->
+    <customPermissions>
+        <enabled>true</enabled>
+        <name>Dynamic_UI_Access</name>
+    </customPermissions>
+
     <!-- External Credential Principal Access -->
     <externalCredentialPrincipalAccesses>
         <enabled>true</enabled>
