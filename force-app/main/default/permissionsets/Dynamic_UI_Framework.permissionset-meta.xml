@@ -111,6 +111,21 @@
     <!-- Field Permissions: Custom_Field_Mapping__c (non-required, non-master-detail) -->
     <fieldPermissions>
         <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Field_Subtype__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Address_Group__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Is_Read_Only__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Custom_Field_Mapping__c.Field_Label_Override__c</field>
         <readable>true</readable>
     </fieldPermissions>

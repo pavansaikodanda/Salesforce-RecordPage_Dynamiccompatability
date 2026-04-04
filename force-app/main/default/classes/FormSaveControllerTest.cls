@@ -1,12 +1,33 @@
 @IsTest
 class FormSaveControllerTest {
 
+    static Custom_Object_Mapping__c insertMappingWithReadOnlyField() {
+        Custom_Object_Mapping__c mapping = new Custom_Object_Mapping__c(
+            Name = 'Save Test Mapping',
+            Developer_Name__c = 'Save_Test_Mapping',
+            Object_API_Name__c = 'Account',
+            Page_Layout_ID__c = '0AhXXXXXXXXXXX'
+        );
+        insert mapping;
+        insert new Custom_Field_Mapping__c(
+            Object_Mapping__c = mapping.Id,
+            Field_API_Name__c = 'Industry',
+            Is_Read_Only__c = true
+        );
+        insert new Custom_Field_Mapping__c(
+            Object_Mapping__c = mapping.Id,
+            Field_API_Name__c = 'Name',
+            Is_Read_Only__c = false
+        );
+        return mapping;
+    }
+
     @IsTest
     static void testInsertRecord() {
         Map<String, Object> fieldData = new Map<String, Object>{ 'Name' => 'Test Account Insert' };
         Test.startTest();
         FormWrappers.SaveResultWrapper result = FormSaveController.saveRecord(
-            'Account', null, JSON.serialize(fieldData)
+            'Account', null, JSON.serialize(fieldData), null
         );
         Test.stopTest();
         Assert.isTrue(result.isSuccess);
@@ -21,7 +42,7 @@ class FormSaveControllerTest {
         Map<String, Object> fieldData = new Map<String, Object>{ 'Name' => 'Updated Name' };
         Test.startTest();
         FormWrappers.SaveResultWrapper result = FormSaveController.saveRecord(
-            'Account', acc.Id, JSON.serialize(fieldData)
+            'Account', acc.Id, JSON.serialize(fieldData), null
         );
         Test.stopTest();
         Assert.isTrue(result.isSuccess);
@@ -31,11 +52,10 @@ class FormSaveControllerTest {
 
     @IsTest
     static void testDmlError() {
-        // Insert Account without Name — DML will fail
         Map<String, Object> fieldData = new Map<String, Object>();
         Test.startTest();
         FormWrappers.SaveResultWrapper result = FormSaveController.saveRecord(
-            'Account', null, JSON.serialize(fieldData)
+            'Account', null, JSON.serialize(fieldData), null
         );
         Test.stopTest();
         Assert.isFalse(result.isSuccess);
@@ -51,7 +71,7 @@ class FormSaveControllerTest {
         };
         Test.startTest();
         FormWrappers.SaveResultWrapper result = FormSaveController.saveRecord(
-            'Account', null, JSON.serialize(fieldData)
+            'Account', null, JSON.serialize(fieldData), null
         );
         Test.stopTest();
         Assert.isTrue(result.isSuccess);
@@ -62,7 +82,6 @@ class FormSaveControllerTest {
 
     @IsTest
     static void testBooleanTypeConversion() {
-        // Use Contact — HasOptedOutOfEmail is a boolean field
         Contact c = new Contact(LastName = 'BoolTest');
         insert c;
         Map<String, Object> fieldData = new Map<String, Object>{
@@ -71,7 +90,7 @@ class FormSaveControllerTest {
         };
         Test.startTest();
         FormWrappers.SaveResultWrapper result = FormSaveController.saveRecord(
-            'Contact', c.Id, JSON.serialize(fieldData)
+            'Contact', c.Id, JSON.serialize(fieldData), null
         );
         Test.stopTest();
         Assert.isTrue(result.isSuccess);
@@ -86,9 +105,30 @@ class FormSaveControllerTest {
         };
         Test.startTest();
         FormWrappers.SaveResultWrapper result = FormSaveController.saveRecord(
-            'Account', null, JSON.serialize(fieldData)
+            'Account', null, JSON.serialize(fieldData), null
         );
         Test.stopTest();
         Assert.isTrue(result.isSuccess);
+    }
+
+    @IsTest
+    static void testReadOnlyFieldsSkipped() {
+        insertMappingWithReadOnlyField();
+        Account acc = new Account(Name = 'ReadOnly Test');
+        insert acc;
+        // Industry is marked read-only in mapping — should not be saved
+        Map<String, Object> fieldData = new Map<String, Object>{
+            'Name' => 'ReadOnly Updated',
+            'Industry' => 'Technology'
+        };
+        Test.startTest();
+        FormWrappers.SaveResultWrapper result = FormSaveController.saveRecord(
+            'Account', acc.Id, JSON.serialize(fieldData), 'Save_Test_Mapping'
+        );
+        Test.stopTest();
+        Assert.isTrue(result.isSuccess);
+        Account updated = [SELECT Name, Industry FROM Account WHERE Id = :acc.Id];
+        Assert.areEqual('ReadOnly Updated', updated.Name);
+        Assert.isNull(updated.Industry);
     }
 }

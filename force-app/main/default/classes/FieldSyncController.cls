@@ -5,6 +5,13 @@ public class FieldSyncController {
         'systemmodstamp', 'isdeleted', 'lastactivitydate', 'lastvieweddate', 'lastreferenceddate'
     };
 
+    private static final Set<Schema.DisplayType> EXCLUDED_TYPES = new Set<Schema.DisplayType>{
+        Schema.DisplayType.Address,
+        Schema.DisplayType.Location,
+        Schema.DisplayType.Base64,
+        Schema.DisplayType.EncryptedString
+    };
+
     @AuraEnabled
     public static FormWrappers.SyncResultWrapper syncFields(String objectMappingId) {
         Custom_Object_Mapping__c mapping = [
@@ -73,18 +80,21 @@ public class FieldSyncController {
         Integer unchanged = 0;
 
         for (String fieldName : incomingFields) {
-            // Skip system fields that are never writable
             if (SYSTEM_FIELD_EXCLUSIONS.contains(fieldName.toLowerCase())) continue;
 
             Schema.SObjectField sof = schemaFields.get(fieldName.toLowerCase());
+            Boolean isReadOnly = false;
+
             if (sof != null) {
                 Schema.DescribeFieldResult dfr = sof.getDescribe();
-                // Skip formula, encrypted, auto-number, polymorphic name, and non-writable fields
-                if (dfr.isCalculated()) continue;
-                if (dfr.getType() == Schema.DisplayType.EncryptedString) continue;
-                if (dfr.isAutoNumber()) continue;
-                if (dfr.isNamePointing()) continue;
-                if (!dfr.isUpdateable() && !dfr.isCreateable()) continue;
+
+                if (EXCLUDED_TYPES.contains(dfr.getType())) continue;
+
+                if (dfr.isCalculated() || dfr.isAutoNumber()) {
+                    isReadOnly = true;
+                } else if (!dfr.isUpdateable() && !dfr.isCreateable()) {
+                    continue;
+                }
             }
 
             if (existingByApiName.containsKey(fieldName)) {
@@ -109,6 +119,7 @@ public class FieldSyncController {
                     Field_API_Name__c = fieldName,
                     Field_Type__c = fieldType,
                     Is_Required_Layout__c = isRequired,
+                    Is_Read_Only__c = isReadOnly,
                     Reference_To__c = referenceTo,
                     Section_Label__c = fieldToSection.get(fieldName),
                     Default_Visibility__c = 'Visible',

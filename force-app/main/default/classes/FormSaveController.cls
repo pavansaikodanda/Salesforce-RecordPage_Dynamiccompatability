@@ -4,10 +4,29 @@ public class FormSaveController {
     public static FormWrappers.SaveResultWrapper saveRecord(
         String objectApiName,
         String recordId,
-        String fieldDataJson
+        String fieldDataJson,
+        String developerName
     ) {
         FormWrappers.SaveResultWrapper result = new FormWrappers.SaveResultWrapper();
         try {
+            Set<String> readOnlyFields = new Set<String>();
+            if (String.isNotBlank(developerName)) {
+                List<Custom_Object_Mapping__c> mappings = [
+                    SELECT Id FROM Custom_Object_Mapping__c
+                    WHERE Developer_Name__c = :developerName LIMIT 1
+                ];
+                if (!mappings.isEmpty()) {
+                    for (Custom_Field_Mapping__c cfm : [
+                        SELECT Field_API_Name__c
+                        FROM Custom_Field_Mapping__c
+                        WHERE Object_Mapping__c = :mappings[0].Id
+                        AND Is_Read_Only__c = true
+                    ]) {
+                        readOnlyFields.add(cfm.Field_API_Name__c.toLowerCase());
+                    }
+                }
+            }
+
             Map<String, Object> fieldData = (Map<String, Object>) JSON.deserializeUntyped(fieldDataJson);
 
             SObject record = Schema.getGlobalDescribe().get(objectApiName).newSObject();
@@ -18,6 +37,7 @@ public class FormSaveController {
             for (String fieldName : fieldData.keySet()) {
                 Object val = fieldData.get(fieldName);
                 if (val == null) continue;
+                if (readOnlyFields.contains(fieldName.toLowerCase())) continue;
 
                 Schema.SObjectField sof = fieldMap.get(fieldName.toLowerCase());
                 if (sof == null) continue;
