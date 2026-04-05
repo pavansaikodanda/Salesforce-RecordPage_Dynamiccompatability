@@ -54,18 +54,18 @@ public class FormConfigController {
         // Fetch current record data if recordId provided
         Map<String, Object> recordData = new Map<String, Object>();
         if (String.isNotBlank(recordId) && !fieldMappings.isEmpty()) {
-            List<String> fieldApiNames = new List<String>{ 'Id' };
+            Set<String> fieldApiNameSet = new Set<String>{ 'Id' };
             if (String.isNotBlank(mapping.Stage_Picklist_Field__c)
                 && schemaFields != null
                 && schemaFields.containsKey(mapping.Stage_Picklist_Field__c.toLowerCase())) {
-                fieldApiNames.add(mapping.Stage_Picklist_Field__c);
+                fieldApiNameSet.add(mapping.Stage_Picklist_Field__c);
             }
             for (Custom_Field_Mapping__c fm : fieldMappings) {
                 if (schemaFields != null && schemaFields.containsKey(fm.Field_API_Name__c.toLowerCase())) {
-                    fieldApiNames.add(fm.Field_API_Name__c);
+                    fieldApiNameSet.add(fm.Field_API_Name__c);
                 }
             }
-            String soql = 'SELECT ' + String.join(fieldApiNames, ', ')
+            String soql = 'SELECT ' + String.join(new List<String>(fieldApiNameSet), ', ')
                 + ' FROM ' + objectApiName
                 + ' WHERE Id = :recordId LIMIT 1';
             List<SObject> records = Database.query(soql);
