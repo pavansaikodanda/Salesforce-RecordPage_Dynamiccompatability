@@ -59,8 +59,18 @@ public class FieldSyncController {
         Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
         Map<String, Object> metadata = (Map<String, Object>) body.get('Metadata');
 
-        // Extract field name → section label from layout sections
+        // Describe schema first so compound expansion can use it
+        Map<String, Schema.SObjectField> schemaFields = Schema.getGlobalDescribe()
+            .get(mapping.Object_API_Name__c).getDescribe().fields.getMap();
+
+        // Parse layout sections
+        // fieldToSection: concrete field API name → section label
+        // compoundToSection: compound component name (e.g. Name, MailingAddress) → section label
+        // layoutCompoundComponents: set of compound names seen in the layout
         Map<String, String> fieldToSection = new Map<String, String>();
+        Map<String, String> compoundToSection = new Map<String, String>();
+        Set<String> layoutCompoundComponents = new Set<String>();
+
         List<Object> sections = (List<Object>) metadata.get('layoutSections');
         if (sections != null) {
             for (Object sec : sections) {
@@ -77,14 +87,32 @@ public class FieldSyncController {
                         String fieldName = (String) layoutItem.get('field');
                         if (String.isNotBlank(fieldName)) {
                             fieldToSection.put(fieldName, sectionLabel);
+                        } else {
+                            String component = (String) layoutItem.get('component');
+                            if (String.isNotBlank(component)) {
+                                layoutCompoundComponents.add(component);
+                                compoundToSection.put(component, sectionLabel);
+                            }
                         }
                     }
                 }
             }
         }
 
-        Map<String, Schema.SObjectField> schemaFields = Schema.getGlobalDescribe()
-            .get(mapping.Object_API_Name__c).getDescribe().fields.getMap();
+        // Expand compound components: any schema field whose getCompoundFieldName()
+        // matches a compound seen in the layout gets added to fieldToSection
+        if (!layoutCompoundComponents.isEmpty()) {
+            for (String apiNameLower : schemaFields.keySet()) {
+                Schema.DescribeFieldResult dfr = schemaFields.get(apiNameLower).getDescribe();
+                String compound = dfr.getCompoundFieldName();
+                if (String.isNotBlank(compound) && layoutCompoundComponents.contains(compound)) {
+                    String fieldApiName = dfr.getName();
+                    if (!fieldToSection.containsKey(fieldApiName)) {
+                        fieldToSection.put(fieldApiName, compoundToSection.get(compound));
+                    }
+                }
+            }
+        }
 
         // Always include the Name field if the object has one and it wasn't in the layout
         Schema.SObjectField nameSof = schemaFields.get('name');
