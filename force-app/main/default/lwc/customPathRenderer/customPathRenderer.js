@@ -41,6 +41,7 @@ export default class CustomPathRenderer extends LightningElement {
         if (!this.pathConfig?.stages) return [];
         return this.pathConfig.stages.map(s => ({
             ...s,
+            displayLabel: s.stageLabel || s.stageValue,
             isCurrent: s.stageValue === this.currentStage,
             isCompleted: this._isCompleted(s.stageValue),
             cssClass: this._stageClass(s.stageValue)

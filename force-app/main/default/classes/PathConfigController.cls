@@ -86,7 +86,8 @@ public class PathConfigController {
                 pm.Object_Mapping__c = objectMappingId;
                 pm.Stage_Value__c = stageValue;
             }
-            if (stage.get('stageLabel') != null) pm.Stage_Label__c = (String) stage.get('stageLabel');
+            String stageLabel = (String) stage.get('stageLabel');
+            pm.Stage_Label__c = String.isNotBlank(stageLabel) ? stageLabel : stageValue;
             if (stage.get('stageOrder') != null) pm.Stage_Order__c = Decimal.valueOf(String.valueOf(stage.get('stageOrder')));
             if (stage.get('guidanceText') != null) pm.Guidance_Text__c = (String) stage.get('guidanceText');
             pm.Is_Active__c = true;

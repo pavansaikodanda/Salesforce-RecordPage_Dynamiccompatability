@@ -5,7 +5,7 @@ public class FieldSyncController {
     };
 
     private static final Set<String> ALWAYS_REQUIRED_READONLY = new Set<String>{
-        'createddate', 'createdbyid', 'lastmodifieddate', 'lastmodifiedbyid'
+        'createddate', 'createdbyid', 'lastmodifieddate', 'lastmodifiedbyid', 'ownerid'
     };
 
     private static final Set<Schema.DisplayType> EXCLUDED_TYPES = new Set<Schema.DisplayType>{
