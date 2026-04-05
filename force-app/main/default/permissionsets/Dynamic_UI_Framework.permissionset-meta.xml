@@ -184,6 +184,31 @@
         <field>Custom_Field_Mapping__c.Is_Active__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Group_With__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Group_Label__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Group_Primary__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Split_Pattern__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Help_Text__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 
     <!-- Field Permissions: Field_Stage_Config__c -->
     <fieldPermissions>

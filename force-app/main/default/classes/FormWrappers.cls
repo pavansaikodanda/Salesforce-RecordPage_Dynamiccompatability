@@ -29,6 +29,11 @@ public class FormWrappers {
         @AuraEnabled public List<FormWrappers.PicklistValueWrapper> picklistValues;
         @AuraEnabled public List<StageConfigWrapper> stageConfigs;
         @AuraEnabled public List<PicklistPermissionWrapper> picklistPermissions;
+        @AuraEnabled public String groupWith;
+        @AuraEnabled public String groupLabel;
+        @AuraEnabled public Boolean groupPrimary;
+        @AuraEnabled public String splitPattern;
+        @AuraEnabled public String helpText;
     }
 
     public class StageConfigWrapper {

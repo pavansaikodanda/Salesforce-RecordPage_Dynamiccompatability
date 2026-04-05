@@ -9,8 +9,8 @@ public class FieldMappingController {
                 Field_Type__c, Field_Subtype__c, Address_Group__c,
                 Is_Read_Only__c, Is_Always_Required__c, Reference_To__c, Section_Label__c,
                 Display_Order__c, Default_Visibility__c,
-                Is_Required_Layout__c, Regex_Pattern__c,
-                Regex_Error_Message__c, Is_Active__c,
+                Is_Required_Layout__c, Regex_Pattern__c, Regex_Error_Message__c, Is_Active__c,
+                Group_With__c, Group_Label__c, Group_Primary__c, Split_Pattern__c, Help_Text__c,
                 (SELECT Stage_Value__c, Visibility__c FROM Field_Stage_Configs__r),
                 (SELECT Picklist_Value__c, Custom_Permission_API_Name__c FROM Picklist_Permission_Mappings__r)
             FROM Custom_Field_Mapping__c
@@ -33,6 +33,11 @@ public class FieldMappingController {
             fw.isRequiredLayout = fm.Is_Required_Layout__c;
             fw.regexPattern = fm.Regex_Pattern__c;
             fw.regexErrorMessage = fm.Regex_Error_Message__c;
+            fw.groupWith = fm.Group_With__c;
+            fw.groupLabel = fm.Group_Label__c;
+            fw.groupPrimary = fm.Group_Primary__c;
+            fw.splitPattern = fm.Split_Pattern__c;
+            fw.helpText = fm.Help_Text__c;
 
             fw.stageConfigs = new List<FormWrappers.StageConfigWrapper>();
             if (fm.Field_Stage_Configs__r != null) {
@@ -102,6 +107,11 @@ public class FieldMappingController {
             if (fm.get('regexPattern') != null) cfm.Regex_Pattern__c = (String) fm.get('regexPattern');
             if (fm.get('regexErrorMessage') != null) cfm.Regex_Error_Message__c = (String) fm.get('regexErrorMessage');
             if (fm.get('isActive') != null) cfm.Is_Active__c = Boolean.valueOf(String.valueOf(fm.get('isActive')));
+            if (fm.get('groupWith') != null) cfm.Group_With__c = (String) fm.get('groupWith');
+            if (fm.get('groupLabel') != null) cfm.Group_Label__c = (String) fm.get('groupLabel');
+            if (fm.get('groupPrimary') != null) cfm.Group_Primary__c = Boolean.valueOf(String.valueOf(fm.get('groupPrimary')));
+            if (fm.get('splitPattern') != null) cfm.Split_Pattern__c = (String) fm.get('splitPattern');
+            if (fm.get('helpText') != null) cfm.Help_Text__c = (String) fm.get('helpText');
 
             toUpsert.add(cfm);
         }

@@ -9,8 +9,8 @@ public class FormConfigController {
                     Field_Type__c, Field_Subtype__c, Address_Group__c,
                     Is_Read_Only__c, Is_Always_Required__c, Reference_To__c, Section_Label__c,
                     Display_Order__c, Default_Visibility__c,
-                    Is_Required_Layout__c, Regex_Pattern__c,
-                    Regex_Error_Message__c, Is_Active__c,
+                    Is_Required_Layout__c, Regex_Pattern__c, Regex_Error_Message__c, Is_Active__c,
+                    Group_With__c, Group_Label__c, Group_Primary__c, Split_Pattern__c, Help_Text__c,
                     (SELECT Stage_Value__c, Visibility__c
                      FROM Field_Stage_Configs__r),
                     (SELECT Picklist_Value__c, Custom_Permission_API_Name__c
@@ -96,6 +96,11 @@ public class FormConfigController {
             fw.isRequiredLayout = fm.Is_Required_Layout__c;
             fw.regexPattern = fm.Regex_Pattern__c;
             fw.regexErrorMessage = fm.Regex_Error_Message__c;
+            fw.groupWith = fm.Group_With__c;
+            fw.groupLabel = fm.Group_Label__c;
+            fw.groupPrimary = fm.Group_Primary__c;
+            fw.splitPattern = fm.Split_Pattern__c;
+            fw.helpText = fm.Help_Text__c;
 
             fw.picklistValues = new List<FormWrappers.PicklistValueWrapper>();
             if (schemaFields != null) {

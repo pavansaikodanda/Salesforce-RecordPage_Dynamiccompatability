@@ -160,6 +160,84 @@
                                             </lightning-input>
                                         </div>
                                     </div>
+
+                                    <!-- Group Config Section -->
+                                    <div class="slds-section slds-m-top_small">
+                                        <h4 class="slds-text-title_caps slds-m-bottom_small">Grouping</h4>
+                                        <div class="slds-grid slds-gutters slds-wrap">
+                                            <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                                <lightning-input
+                                                    type="checkbox"
+                                                    label="Group Primary"
+                                                    checked={activeField.groupPrimary}
+                                                    disabled={activeField.isAlwaysRequired}
+                                                    data-prop="groupPrimary"
+                                                    onchange={handleGroupPrimaryChange}>
+                                                </lightning-input>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                                <lightning-input
+                                                    label="Help Text"
+                                                    value={activeField.helpText}
+                                                    disabled={activeField.isAlwaysRequired}
+                                                    data-prop="helpText"
+                                                    onchange={handleFieldPropChange}>
+                                                </lightning-input>
+                                            </div>
+                                        </div>
+
+                                        <template lwc:if={activeField.groupPrimary}>
+                                            <div class="slds-grid slds-gutters slds-wrap">
+                                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                                    <lightning-input
+                                                        label="Group With (Field API Name)"
+                                                        value={activeField.groupWith}
+                                                        disabled={activeField.isAlwaysRequired}
+                                                        data-prop="groupWith"
+                                                        onchange={handleFieldPropChange}>
+                                                    </lightning-input>
+                                                    <template lwc:if={groupWithWarning}>
+                                                        <p class="slds-text-color_error slds-text-body_small slds-m-top_xx-small">{groupWithWarning}</p>
+                                                    </template>
+                                                </div>
+                                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                                    <lightning-input
+                                                        label="Group Label"
+                                                        value={activeField.groupLabel}
+                                                        disabled={activeField.isAlwaysRequired}
+                                                        data-prop="groupLabel"
+                                                        onchange={handleFieldPropChange}>
+                                                    </lightning-input>
+                                                </div>
+                                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                                    <lightning-combobox
+                                                        label="Split Pattern"
+                                                        value={splitPatternComboValue}
+                                                        options={splitPatternOptions}
+                                                        disabled={activeField.isAlwaysRequired}
+                                                        onchange={handleSplitPatternChange}>
+                                                    </lightning-combobox>
+                                                </div>
+                                                <template lwc:if={isCustomSplitPattern}>
+                                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                                        <lightning-input
+                                                            label="Custom Delimiter"
+                                                            value={activeField.splitPattern}
+                                                            placeholder="e.g.  |  or  -"
+                                                            data-prop="splitPattern"
+                                                            onchange={handleFieldPropChange}>
+                                                        </lightning-input>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={isGroupedSecondary}>
+                                            <div class="slds-m-top_x-small">
+                                                <span class="slds-badge">Secondary — grouped with {activeField.groupWith}</span>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </template>
 

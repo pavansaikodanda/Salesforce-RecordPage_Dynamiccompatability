@@ -76,7 +76,17 @@ export default class CustomFormRenderer extends LightningElement {
     get visibleSections() {
         if (!this.formConfig?.fields) return [];
 
-        const fields = this.formConfig.fields.filter(f => this._isFieldVisible(f));
+        // Collect secondary field API names — these are rendered inside their primary field,
+        // so they must not appear as standalone rows in the form.
+        const secondaryApiNames = new Set(
+            this.formConfig.fields
+                .filter(f => f.groupWith && !f.groupPrimary)
+                .map(f => f.fieldApiName)
+        );
+
+        const fields = this.formConfig.fields.filter(f =>
+            this._isFieldVisible(f) && !secondaryApiNames.has(f.fieldApiName)
+        );
         const sectionMap = new Map();
 
         for (const field of fields) {
@@ -121,13 +131,17 @@ export default class CustomFormRenderer extends LightningElement {
     }
 
     _buildFieldRow(field) {
-        return {
+        const row = {
             ...field,
             value: this.fieldValues[field.fieldApiName] ?? field.defaultValue ?? null,
             required: this._isFieldRequired(field),
             disabled: field.isReadOnly,
             error: this.fieldErrors[field.fieldApiName] || null
         };
+        if (field.groupWith && field.groupPrimary) {
+            row.secondaryValue = this.fieldValues[field.groupWith] ?? null;
+        }
+        return row;
     }
 
     handleValueChange(event) {

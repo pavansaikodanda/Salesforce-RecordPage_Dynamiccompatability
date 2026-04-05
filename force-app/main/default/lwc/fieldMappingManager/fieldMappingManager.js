@@ -10,6 +10,16 @@ import LABEL_ERROR from '@salesforce/label/c.Error_Generic';
 
 const TABS = ['General', 'Visibility', 'Validation', 'Permissions'];
 
+const SPLIT_PATTERN_STANDARD = ['LAST_SPACE', 'FIRST_SPACE', 'ALL_PRIMARY', 'ALL_SECONDARY'];
+
+const SPLIT_PATTERN_OPTIONS = [
+    { label: 'Last Space (e.g. First | Last)', value: 'LAST_SPACE' },
+    { label: 'First Space (e.g. Title | Rest)', value: 'FIRST_SPACE' },
+    { label: 'All → Primary', value: 'ALL_PRIMARY' },
+    { label: 'All → Secondary', value: 'ALL_SECONDARY' },
+    { label: 'Custom Delimiter', value: 'Custom' }
+];
+
 const VISIBILITY_OPTIONS = [
     { label: 'Visible', value: 'Visible' },
     { label: 'Hidden', value: 'Hidden' },
@@ -37,6 +47,7 @@ export default class FieldMappingManager extends LightningElement {
 
     visibilityOptions = VISIBILITY_OPTIONS;
     fieldSubtypeOptions = FIELD_SUBTYPE_OPTIONS;
+    splitPatternOptions = SPLIT_PATTERN_OPTIONS;
     tabs = TABS;
 
     @track fields = [];
@@ -122,6 +133,58 @@ export default class FieldMappingManager extends LightningElement {
     get tabVisibility() { return this.activeTab === 'Visibility' && !this.activeField?.isAlwaysRequired; }
     get tabValidation() { return this.activeTab === 'Validation' && !this.activeField?.isAlwaysRequired; }
     get tabPermissions() { return this.activeTab === 'Permissions' && !this.activeField?.isAlwaysRequired; }
+
+    get isGroupedSecondary() {
+        const f = this.activeField;
+        return !!(f?.groupWith && !f.groupPrimary);
+    }
+
+    get isCustomSplitPattern() {
+        const sp = this.activeField?.splitPattern;
+        return sp != null && sp !== '' && !SPLIT_PATTERN_STANDARD.includes(sp);
+    }
+
+    get splitPatternComboValue() {
+        const sp = this.activeField?.splitPattern;
+        if (!sp || SPLIT_PATTERN_STANDARD.includes(sp)) return sp || 'LAST_SPACE';
+        return 'Custom';
+    }
+
+    get groupWithWarning() {
+        const f = this.activeField;
+        if (!f?.groupWith) return null;
+        const exists = this.fields.some(fl => fl.fieldApiName === f.groupWith);
+        return exists ? null : `"${f.groupWith}" is not in the current field list`;
+    }
+
+    handleGroupPrimaryChange(event) {
+        if (this.activeFieldIndex === null) return;
+        const checked = event.target.checked;
+        const fields = [...this.fields];
+        const field = { ...fields[this.activeFieldIndex], groupPrimary: checked };
+        if (!checked) {
+            field.groupWith = null;
+            field.groupLabel = null;
+            field.splitPattern = null;
+        }
+        fields[this.activeFieldIndex] = field;
+        this.fields = fields;
+        this.isDirty = true;
+    }
+
+    handleSplitPatternChange(event) {
+        if (this.activeFieldIndex === null) return;
+        const val = event.detail.value;
+        const fields = [...this.fields];
+        // If a standard option is selected, store it directly.
+        // If 'Custom' is selected, clear the field so the user can type a delimiter.
+        fields[this.activeFieldIndex] = {
+            ...fields[this.activeFieldIndex],
+            splitPattern: val === 'Custom' ? '' : val
+        };
+        this.fields = fields;
+        this.isDirty = true;
+    }
 
     handleFieldPropChange(event) {
         if (this.activeFieldIndex === null) return;
@@ -249,7 +312,12 @@ export default class FieldMappingManager extends LightningElement {
             isRequiredLayout: f.isRequiredLayout,
             regexPattern: f.regexPattern,
             regexErrorMessage: f.regexErrorMessage,
-            isActive: f.isActive !== false
+            isActive: f.isActive !== false,
+            groupWith: f.groupWith ?? null,
+            groupLabel: f.groupLabel ?? null,
+            groupPrimary: f.groupPrimary ?? false,
+            splitPattern: f.splitPattern ?? null,
+            helpText: f.helpText ?? null
         }));
 
         saveFieldMappings({ objectMappingId: this.recordId, fieldMappingsJson: JSON.stringify(payload) })

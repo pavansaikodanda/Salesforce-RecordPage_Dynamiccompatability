@@ -1,6 +1,25 @@
 <template>
+    <!-- Grouped Primary: renders a single combined input that splits into two fields -->
+    <template lwc:if={isGroupedPrimary}>
+        <lightning-input
+            type="text"
+            label={groupedLabel}
+            value={groupedDisplayValue}
+            required={required}
+            disabled={disabled}
+            message-when-value-missing={error}
+            onchange={handleGroupedChange}>
+        </lightning-input>
+        <template lwc:if={splitHint}>
+            <p class="slds-text-body_small slds-m-top_xx-small" style="color: #c27400;">{splitHint}</p>
+        </template>
+        <template lwc:if={splitPreview}>
+            <p class="slds-text-body_small slds-m-top_xx-small" style="color: #2e844a;">{splitPreview}</p>
+        </template>
+    </template>
+
     <!-- Text / Email / URL / Phone -->
-    <template lwc:if={isText}>
+    <template lwc:elseif={isText}>
         <template lwc:if={isTextArea}>
             <lightning-textarea
                 label={fieldLabel}
@@ -126,5 +145,9 @@
 
     <template lwc:if={error}>
         <p class="slds-form-error">{error}</p>
+    </template>
+
+    <template lwc:if={helpText}>
+        <p class="slds-form-element__help slds-m-top_xx-small">{helpText}</p>
     </template>
 </template>
