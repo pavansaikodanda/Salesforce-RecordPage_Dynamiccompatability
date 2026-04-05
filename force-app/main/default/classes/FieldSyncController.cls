@@ -63,15 +63,14 @@ public class FieldSyncController {
         Map<String, Schema.SObjectField> schemaFields = Schema.getGlobalDescribe()
             .get(mapping.Object_API_Name__c).getDescribe().fields.getMap();
 
-        // Parse layout sections
-        // fieldToSection: concrete field API name → section label
-        // compoundToSection: compound component name (e.g. Name, MailingAddress) → section label
-        // layoutCompoundComponents: set of compound names seen in the layout
+        // Parse layout sections: all layout items use 'field' — compound fields like Name
+        // and Address appear as field values (e.g. "field":"Name", "field":"Address"),
+        // not as component values. We collect them all here and expand compounds below.
         Map<String, String> fieldToSection = new Map<String, String>();
-        Map<String, String> compoundToSection = new Map<String, String>();
-        Set<String> layoutCompoundComponents = new Set<String>();
 
         List<Object> sections = (List<Object>) metadata.get('layoutSections');
+        System.debug('=== LAYOUT SECTIONS ===');
+        System.debug(JSON.serialize(sections));
         if (sections != null) {
             for (Object sec : sections) {
                 Map<String, Object> section = (Map<String, Object>) sec;
@@ -87,37 +86,31 @@ public class FieldSyncController {
                         String fieldName = (String) layoutItem.get('field');
                         if (String.isNotBlank(fieldName)) {
                             fieldToSection.put(fieldName, sectionLabel);
-                        } else {
-                            String component = (String) layoutItem.get('component');
-                            if (String.isNotBlank(component)) {
-                                layoutCompoundComponents.add(component);
-                                compoundToSection.put(component, sectionLabel);
-                            }
                         }
                     }
                 }
             }
         }
 
-        // Expand compound components: any schema field whose getCompoundFieldName()
-        // matches a compound seen in the layout gets added to fieldToSection
-        if (!layoutCompoundComponents.isEmpty()) {
-            for (String apiNameLower : schemaFields.keySet()) {
-                Schema.DescribeFieldResult dfr = schemaFields.get(apiNameLower).getDescribe();
-                String compound = dfr.getCompoundFieldName();
-                if (String.isNotBlank(compound) && layoutCompoundComponents.contains(compound)) {
-                    String fieldApiName = dfr.getName();
-                    if (!fieldToSection.containsKey(fieldApiName)) {
-                        fieldToSection.put(fieldApiName, compoundToSection.get(compound));
-                    }
-                }
-            }
-        }
-
-        // Always include the Name field if the object has one and it wasn't in the layout
+        // Ensure Name compound is present even if the layout omitted it
         Schema.SObjectField nameSof = schemaFields.get('name');
         if (nameSof != null && !fieldToSection.containsKey('Name')) {
             fieldToSection.put('Name', 'Information');
+        }
+
+        // Expand compound field references: the layout stores compound names as field values
+        // (e.g. "Name" → expands to FirstName, LastName; "Address" → Street, City, etc.).
+        // Any schema field whose getCompoundFieldName() matches a key in fieldToSection
+        // is a sub-field of that compound — add it with the compound's section label.
+        for (String apiNameLower : schemaFields.keySet()) {
+            Schema.DescribeFieldResult dfr = schemaFields.get(apiNameLower).getDescribe();
+            String compound = dfr.getCompoundFieldName();
+            if (String.isNotBlank(compound) && fieldToSection.containsKey(compound)) {
+                String fieldApiName = dfr.getName();
+                if (!fieldToSection.containsKey(fieldApiName)) {
+                    fieldToSection.put(fieldApiName, fieldToSection.get(compound));
+                }
+            }
         }
 
         // Load existing mappings into map by field API name
@@ -130,12 +123,15 @@ public class FieldSyncController {
             existingByApiName.put(cfm.Field_API_Name__c, cfm);
         }
 
-        Set<String> incomingFields = fieldToSection.keySet();
+        // incomingFields is built only from fields that pass all schema checks.
+        // Fields that fail (no schema entry, excluded type, not editable) are excluded,
+        // so stale DB records for those fields will be cleaned up in the delete pass.
+        Set<String> incomingFields = new Set<String>();
         List<Custom_Field_Mapping__c> toInsert = new List<Custom_Field_Mapping__c>();
         List<Custom_Field_Mapping__c> toDelete = new List<Custom_Field_Mapping__c>();
         Integer unchanged = 0;
 
-        for (String fieldName : incomingFields) {
+        for (String fieldName : fieldToSection.keySet()) {
             String fieldNameLower = fieldName.toLowerCase();
             if (SYSTEM_FIELD_EXCLUSIONS.contains(fieldNameLower)) continue;
 
@@ -156,6 +152,9 @@ public class FieldSyncController {
                 }
             }
 
+            // Field passed all checks — track it as a valid incoming field
+            incomingFields.add(fieldName);
+
             if (existingByApiName.containsKey(fieldName)) {
                 unchanged++;
             } else {
@@ -172,7 +171,14 @@ public class FieldSyncController {
                         isRequired = !dfr.isNillable() && !dfr.isDefaultedOnCreate();
                     }
                     List<Schema.SObjectType> refs = dfr.getReferenceTo();
-                    if (!refs.isEmpty()) {
+                    for (Schema.SObjectType ref : refs) {
+                        String refName = ref.getDescribe().getName();
+                        if (refName == 'User') {
+                            referenceTo = 'User';
+                            break;
+                        }
+                    }
+                    if (referenceTo == null && !refs.isEmpty()) {
                         referenceTo = refs[0].getDescribe().getName();
                     }
                 }
