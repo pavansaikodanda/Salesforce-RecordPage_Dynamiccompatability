@@ -5,7 +5,7 @@ public class FieldMappingController {
         List<FormWrappers.FieldConfigWrapper> result = new List<FormWrappers.FieldConfigWrapper>();
 
         for (Custom_Field_Mapping__c fm : [
-            SELECT Id, Field_API_Name__c, Field_Label_Override__c,
+            SELECT Id, Field_API_Name__c, Field_Label__c, Field_Label_Override__c,
                 Field_Type__c, Field_Subtype__c, Address_Group__c,
                 Is_Read_Only__c, Is_Always_Required__c, Reference_To__c, Section_Label__c,
                 Display_Order__c, Default_Visibility__c,
@@ -19,6 +19,7 @@ public class FieldMappingController {
         ]) {
             FormWrappers.FieldConfigWrapper fw = new FormWrappers.FieldConfigWrapper();
             fw.fieldApiName = fm.Field_API_Name__c;
+            fw.fieldLabel = fm.Field_Label__c;
             fw.labelOverride = fm.Field_Label_Override__c;
             fw.fieldType = fm.Field_Type__c;
             fw.fieldSubtype = fm.Field_Subtype__c;

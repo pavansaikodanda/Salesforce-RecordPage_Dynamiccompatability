@@ -121,6 +121,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Custom_Field_Mapping__c.Field_Label__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Custom_Field_Mapping__c.Is_Always_Required__c</field>
         <readable>true</readable>
     </fieldPermissions>

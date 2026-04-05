@@ -11,6 +11,7 @@ public class FormWrappers {
 
     public class FieldConfigWrapper {
         @AuraEnabled public String fieldApiName;
+        @AuraEnabled public String fieldLabel;
         @AuraEnabled public String labelOverride;
         @AuraEnabled public String fieldType;
         @AuraEnabled public String fieldSubtype;

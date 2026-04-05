@@ -62,6 +62,7 @@ export default class FieldMappingManager extends LightningElement {
                     ...f,
                     _idx: idx,
                     displayOrder: f.displayOrder ?? idx + 1,
+                    displayLabel: f.labelOverride || f.fieldLabel || f.fieldApiName,
                     stageConfigs: (f.stageConfigs || []).map((sc, si) => ({ ...sc, _uid: f.fieldApiName + '_sc_' + si })),
                     picklistPermissions: (f.picklistPermissions || []).map((pp, pi) => ({ ...pp, _uid: f.fieldApiName + '_pp_' + pi }))
                 }));

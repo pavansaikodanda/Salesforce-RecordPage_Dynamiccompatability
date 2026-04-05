@@ -27,7 +27,7 @@ export default class CustomFieldRenderer extends LightningElement {
     }
 
     get fieldLabel() {
-        return this.field?.labelOverride || this.field?.fieldApiName;
+        return this.field?.labelOverride || this.field?.fieldLabel || this.field?.fieldApiName;
     }
 
     get stringValue() {

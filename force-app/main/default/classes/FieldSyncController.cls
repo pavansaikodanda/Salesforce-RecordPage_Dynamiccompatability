@@ -134,10 +134,12 @@ public class FieldSyncController {
                 String fieldType = 'Text';
                 String referenceTo = null;
                 Boolean isRequired = isAlwaysRequired;
+                String fieldLabel = fieldName;
 
                 if (sof != null) {
                     Schema.DescribeFieldResult dfr = sof.getDescribe();
                     fieldType = dfr.getType().name();
+                    fieldLabel = dfr.getLabel();
                     if (!isAlwaysRequired) {
                         isRequired = !dfr.isNillable() && !dfr.isDefaultedOnCreate();
                     }
@@ -150,6 +152,7 @@ public class FieldSyncController {
                 toInsert.add(new Custom_Field_Mapping__c(
                     Object_Mapping__c = objectMappingId,
                     Field_API_Name__c = fieldName,
+                    Field_Label__c = fieldLabel,
                     Field_Type__c = fieldType,
                     Is_Required_Layout__c = isRequired,
                     Is_Read_Only__c = isReadOnly,
