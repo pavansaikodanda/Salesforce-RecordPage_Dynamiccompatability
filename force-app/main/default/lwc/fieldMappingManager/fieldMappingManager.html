@@ -76,6 +76,31 @@
                             <!-- General Tab -->
                             <template lwc:if={tabGeneral}>
                                 <div class="slds-tabs_default__content slds-show slds-p-top_small">
+                                    <div class="slds-grid slds-gutters slds-m-bottom_small">
+                                        <div class="slds-col slds-size_1-of-2">
+                                            <div class="slds-form-element">
+                                                <label class="slds-form-element__label">Field API Name</label>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static"
+                                                         style="background: var(--slds-g-color-neutral-base-95, #f3f3f3); padding: 6px 10px; border-radius: 4px; color: #706e6b; font-size: 13px; border: 1px solid #dddbda;">
+                                                        {activeField.fieldApiName}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2">
+                                            <div class="slds-form-element">
+                                                <label class="slds-form-element__label">Salesforce Label</label>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static"
+                                                         style="background: var(--slds-g-color-neutral-base-95, #f3f3f3); padding: 6px 10px; border-radius: 4px; color: #706e6b; font-size: 13px; border: 1px solid #dddbda;">
+                                                        {activeField.fieldLabel}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slds-m-bottom_medium" style="border-bottom: 1px solid #dddbda;"></div>
                                     <template lwc:if={activeField.isAlwaysRequired}>
                                         <div class="slds-box slds-theme_shade slds-m-bottom_small">
                                             <p class="slds-text-body_small slds-text-color_weak">

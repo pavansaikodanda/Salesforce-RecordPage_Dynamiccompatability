@@ -44,6 +44,9 @@ export default class CustomFieldRenderer extends LightningElement {
     }
 
     get fieldLabel() {
+        if (this.field?.groupWith && this.field?.groupPrimary) {
+            return this.field?.groupLabel || this.field?.labelOverride || this.field?.fieldLabel || this.field?.fieldApiName;
+        }
         return this.field?.labelOverride || this.field?.fieldLabel || this.field?.fieldApiName;
     }
 
