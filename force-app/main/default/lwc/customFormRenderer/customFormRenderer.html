@@ -1,0 +1,53 @@
+<template>
+    <template lwc:if={isLoading}>
+        <lightning-spinner alternative-text={labels.loading} size="medium"></lightning-spinner>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+            <span class="slds-assistive-text">error</span>
+            <p>{errorMessage}</p>
+        </div>
+    </template>
+
+    <template lwc:else>
+        <template for:each={visibleSections} for:item="section">
+            <div key={section.label} class="slds-section slds-is-open slds-m-bottom_medium">
+                <h3 class="slds-section__title slds-theme_shade">
+                    <span class="slds-truncate slds-p-horizontal_small">{section.label}</span>
+                </h3>
+                <div class="slds-section__content">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <template for:each={section.fields} for:item="field">
+                            <div key={field.fieldApiName} class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                <c-custom-field-renderer
+                                    field={field}
+                                    value={field.value}
+                                    required={field.required}
+                                    disabled={field.disabled}
+                                    error={field.error}
+                                    user-permissions={userPermissions}
+                                    onvaluechange={handleValueChange}>
+                                </c-custom-field-renderer>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <div class="slds-m-top_medium">
+            <lightning-button
+                variant="brand"
+                label={labels.save}
+                onclick={handleSave}
+                class="slds-m-right_small">
+            </lightning-button>
+            <lightning-button
+                variant="neutral"
+                label={labels.cancel}
+                onclick={handleCancel}>
+            </lightning-button>
+        </div>
+    </template>
+</template>

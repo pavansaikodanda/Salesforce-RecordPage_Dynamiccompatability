@@ -7,4 +7,123 @@
         <shortDescription>Tooling API Named Credential Name</shortDescription>
         <value>Tooling_API</value>
     </labels>
+    <labels>
+        <fullName>Form_Save_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Form Save Button Label</shortDescription>
+        <value>Save</value>
+    </labels>
+    <labels>
+        <fullName>Form_Cancel_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Form Cancel Button Label</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>Form_Save_Success</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Form Save Success Toast Message</shortDescription>
+        <value>Record saved successfully.</value>
+    </labels>
+    <labels>
+        <fullName>Form_Save_Error</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Form Save Error Toast Title</shortDescription>
+        <value>Save failed</value>
+    </labels>
+    <labels>
+        <fullName>Form_Validation_Required</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Form Required Field Validation Message</shortDescription>
+        <value>This field is required.</value>
+    </labels>
+    <labels>
+        <fullName>Form_Validation_Regex</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Form Regex Validation Default Message</shortDescription>
+        <value>Invalid format.</value>
+    </labels>
+    <labels>
+        <fullName>Path_Stage_Transition_Error</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Path Stage Transition Not Allowed Error</shortDescription>
+        <value>This stage transition is not allowed.</value>
+    </labels>
+    <labels>
+        <fullName>Sync_Success</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Field Sync Success Toast Message</shortDescription>
+        <value>Fields synced: {0} added, {1} removed, {2} unchanged.</value>
+    </labels>
+    <labels>
+        <fullName>Sync_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Sync Fields Button Label</shortDescription>
+        <value>Sync Fields</value>
+    </labels>
+    <labels>
+        <fullName>Object_Mapping_Select_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Object Mapping Select Object Placeholder</shortDescription>
+        <value>Select an object...</value>
+    </labels>
+    <labels>
+        <fullName>Object_Mapping_Select_Layout</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Object Mapping Select Layout Placeholder</shortDescription>
+        <value>Select a page layout...</value>
+    </labels>
+    <labels>
+        <fullName>Field_Mapping_Search_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Field Mapping Search Box Placeholder</shortDescription>
+        <value>Search fields...</value>
+    </labels>
+    <labels>
+        <fullName>Field_Mapping_Save_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Field Mapping Save Changes Button</shortDescription>
+        <value>Save Changes</value>
+    </labels>
+    <labels>
+        <fullName>Path_Config_Add_Stage</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Path Config Add Stage Button</shortDescription>
+        <value>Add Stage</value>
+    </labels>
+    <labels>
+        <fullName>Path_Config_Save_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Path Config Save Button</shortDescription>
+        <value>Save Path Config</value>
+    </labels>
+    <labels>
+        <fullName>Loading</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Generic loading message</shortDescription>
+        <value>Loading...</value>
+    </labels>
+    <labels>
+        <fullName>Error_Generic</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Generic error label</shortDescription>
+        <value>An error occurred. Please try again.</value>
+    </labels>
 </CustomLabels>

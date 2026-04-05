@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>CustomFormStageChange</masterLabel>
+    <isExposed>true</isExposed>
+    <description>Published by customPathRenderer when the user selects a stage. Subscribed by customFormRenderer to update field visibility.</description>
+    <lightningMessageFields>
+        <fieldName>stageValue</fieldName>
+        <description>The selected stage value</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>recordId</fieldName>
+        <description>The record Id associated with the stage change</description>
+    </lightningMessageFields>
+</LightningMessageChannel>

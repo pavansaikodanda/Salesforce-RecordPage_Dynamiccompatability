@@ -1,0 +1,176 @@
+<template>
+    <lightning-card title="Path Configuration" icon-name="standard:stage">
+        <template lwc:if={isLoading}>
+            <lightning-spinner alternative-text={labels.loading} size="medium"></lightning-spinner>
+        </template>
+
+        <template lwc:if={errorMessage}>
+            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-around_small" role="alert">
+                <p>{errorMessage}</p>
+            </div>
+        </template>
+
+        <div class="slds-p-around_medium">
+
+            <!-- Config settings -->
+            <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input
+                        type="checkbox"
+                        label="Enforce Path Order"
+                        checked={enforceOrder}
+                        data-prop="enforceOrder"
+                        onchange={handleConfigChange}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-combobox
+                        label="Stage Order Source"
+                        value={stageOrderSource}
+                        options={stageOrderSourceOptions}
+                        data-prop="stageOrderSource"
+                        onchange={handleConfigChange}>
+                    </lightning-combobox>
+                </div>
+            </div>
+
+            <!-- Stages -->
+            <h3 class="slds-text-heading_small slds-m-bottom_small">Stages</h3>
+            <template for:each={stages} for:item="stage">
+                <div
+                    key={stage._idx}
+                    class="slds-box slds-m-bottom_small"
+                    style="background: #f9f9f9;"
+                    data-idx={stage._idx}
+                    draggable="true"
+                    ondragstart={handleDragStart}
+                    ondragover={handleDragOver}
+                    ondrop={handleDrop}>
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_3-of-12">
+                            <lightning-combobox
+                                label="Stage Value"
+                                value={stage.stageValue}
+                                options={allStageOptions}
+                                placeholder="Select stage..."
+                                data-prop="stageValue"
+                                data-idx={stage._idx}
+                                onchange={handleStageChange}>
+                            </lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_3-of-12">
+                            <lightning-input
+                                label="Stage Label"
+                                value={stage.stageLabel}
+                                data-prop="stageLabel"
+                                data-idx={stage._idx}
+                                onchange={handleStageChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_2-of-12">
+                            <lightning-input
+                                type="number"
+                                label="Order"
+                                value={stage.stageOrder}
+                                data-prop="stageOrder"
+                                data-idx={stage._idx}
+                                onchange={handleStageChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_3-of-12">
+                            <lightning-input
+                                label="Guidance Text"
+                                value={stage.guidanceText}
+                                data-prop="guidanceText"
+                                data-idx={stage._idx}
+                                onchange={handleStageChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-12 slds-align-bottom">
+                            <lightning-button-icon
+                                icon-name="utility:delete"
+                                variant="bare"
+                                alternative-text="Remove Stage"
+                                data-idx={stage._idx}
+                                onclick={handleRemoveStage}>
+                            </lightning-button-icon>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <lightning-button
+                label={labels.addStage}
+                icon-name="utility:add"
+                onclick={handleAddStage}
+                class="slds-m-bottom_medium">
+            </lightning-button>
+
+            <!-- Transitions -->
+            <h3 class="slds-text-heading_small slds-m-top_medium slds-m-bottom_small">Transitions</h3>
+            <template for:each={transitions} for:item="trans">
+                <div key={trans._idx} class="slds-grid slds-gutters slds-m-bottom_small" data-idx={trans._idx}>
+                    <div class="slds-col slds-size_4-of-12">
+                        <lightning-combobox
+                            label="From Stage"
+                            value={trans.fromStage}
+                            options={allStageOptions}
+                            placeholder="From..."
+                            data-prop="fromStage"
+                            data-idx={trans._idx}
+                            onchange={handleTransitionChange}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_4-of-12">
+                        <lightning-combobox
+                            label="To Stage"
+                            value={trans.toStage}
+                            options={allStageOptions}
+                            placeholder="To..."
+                            data-prop="toStage"
+                            data-idx={trans._idx}
+                            onchange={handleTransitionChange}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_2-of-12">
+                        <lightning-input
+                            type="checkbox"
+                            label="Allowed"
+                            checked={trans.isAllowed}
+                            data-prop="isAllowed"
+                            data-idx={trans._idx}
+                            onchange={handleTransitionChange}>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_2-of-12 slds-align-bottom">
+                        <lightning-button-icon
+                            icon-name="utility:delete"
+                            variant="bare"
+                            alternative-text="Remove Transition"
+                            data-idx={trans._idx}
+                            onclick={handleRemoveTransition}>
+                        </lightning-button-icon>
+                    </div>
+                </div>
+            </template>
+
+            <lightning-button
+                label="Add Transition"
+                icon-name="utility:add"
+                onclick={handleAddTransition}
+                class="slds-m-bottom_medium">
+            </lightning-button>
+
+            <!-- Save -->
+            <div class="slds-m-top_medium">
+                <lightning-button
+                    variant="brand"
+                    label={labels.save}
+                    disabled={isSaveDisabled}
+                    onclick={handleSave}>
+                </lightning-button>
+            </div>
+
+        </div>
+    </lightning-card>
+</template>

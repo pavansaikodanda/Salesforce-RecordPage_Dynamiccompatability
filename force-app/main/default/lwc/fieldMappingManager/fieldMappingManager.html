@@ -1,0 +1,293 @@
+<template>
+    <lightning-card title="Field Mapping Manager" icon-name="standard:field_mapping">
+        <template lwc:if={isLoading}>
+            <lightning-spinner alternative-text={labels.loading} size="medium"></lightning-spinner>
+        </template>
+
+        <template lwc:if={errorMessage}>
+            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-around_small" role="alert">
+                <p>{errorMessage}</p>
+            </div>
+        </template>
+
+        <div class="slds-p-around_small">
+            <div class="slds-grid slds-gutters" style="height: 600px;">
+
+                <!-- Left: field list -->
+                <div class="slds-col slds-size_1-of-3" style="overflow-y: auto; border-right: 1px solid #dddbda;">
+                    <div class="slds-p-around_small">
+                        <lightning-input
+                            type="search"
+                            placeholder={labels.search}
+                            value={searchTerm}
+                            onchange={handleSearch}
+                            variant="label-hidden">
+                        </lightning-input>
+                    </div>
+                    <ul class="slds-has-list-interactions">
+                        <template for:each={filteredFields} for:item="field">
+                            <li
+                                key={field.fieldApiName}
+                                class="slds-item slds-p-around_small"
+                                style="cursor:pointer; border-bottom: 1px solid #f3f3f3;"
+                                data-idx={field._idx}
+                                draggable="true"
+                                onclick={handleFieldClick}
+                                ondragstart={handleDragStart}
+                                ondragover={handleDragOver}
+                                ondrop={handleDrop}>
+                                <div class="slds-grid slds-grid_align-spread">
+                                    <span class="slds-text-body_regular slds-truncate">
+                                        {field.fieldApiName}
+                                    </span>
+                                    <lightning-icon
+                                        icon-name="utility:drag_and_drop"
+                                        size="xx-small"
+                                        alternative-text="Drag">
+                                    </lightning-icon>
+                                </div>
+                                <div class="slds-text-body_small slds-text-color_weak">
+                                    {field.sectionLabel}
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <!-- Right: field editor -->
+                <div class="slds-col slds-size_2-of-3 slds-p-around_small" style="overflow-y: auto;">
+                    <template lwc:if={hasActiveField}>
+
+                        <!-- Tabs -->
+                        <div class="slds-tabs_default">
+                            <ul class="slds-tabs_default__nav" role="tablist">
+                                <template for:each={tabs} for:item="tab">
+                                    <li
+                                        key={tab}
+                                        class="slds-tabs_default__item"
+                                        role="presentation"
+                                        data-tab={tab}
+                                        onclick={handleTabClick}>
+                                        <a class="slds-tabs_default__link" role="tab" tabindex="0">{tab}</a>
+                                    </li>
+                                </template>
+                            </ul>
+
+                            <!-- General Tab -->
+                            <template lwc:if={tabGeneral}>
+                                <div class="slds-tabs_default__content slds-show slds-p-top_small">
+                                    <div class="slds-grid slds-gutters slds-wrap">
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                            <lightning-input
+                                                label="Label Override"
+                                                value={activeField.labelOverride}
+                                                data-prop="labelOverride"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                            <lightning-input
+                                                label="Section Label"
+                                                value={activeField.sectionLabel}
+                                                data-prop="sectionLabel"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                            <lightning-input
+                                                type="number"
+                                                label="Display Order"
+                                                value={activeField.displayOrder}
+                                                data-prop="displayOrder"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                            <lightning-combobox
+                                                label="Field Subtype"
+                                                value={activeField.fieldSubtype}
+                                                options={fieldSubtypeOptions}
+                                                data-prop="fieldSubtype"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-combobox>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                            <lightning-input
+                                                label="Address Group"
+                                                value={activeField.addressGroup}
+                                                data-prop="addressGroup"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                            <lightning-input
+                                                type="checkbox"
+                                                label="Read Only"
+                                                checked={activeField.isReadOnly}
+                                                data-prop="isReadOnly"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                            <lightning-input
+                                                type="checkbox"
+                                                label="Is Active"
+                                                checked={activeField.isActive}
+                                                data-prop="isActive"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Visibility Tab -->
+                            <template lwc:if={tabVisibility}>
+                                <div class="slds-tabs_default__content slds-show slds-p-top_small">
+                                    <div class="slds-m-bottom_small">
+                                        <lightning-combobox
+                                            label="Default Visibility"
+                                            value={activeField.defaultVisibility}
+                                            options={visibilityOptions}
+                                            data-prop="defaultVisibility"
+                                            onchange={handleFieldPropChange}>
+                                        </lightning-combobox>
+                                    </div>
+                                    <h4 class="slds-text-title_caps slds-m-bottom_small">Stage-Based Visibility</h4>
+                                    <template for:each={activeField.stageConfigs} for:item="sc" for:index="scIdx">
+                                        <div key={sc._uid} class="slds-grid slds-gutters slds-m-bottom_small" data-sc-idx={scIdx}>
+                                            <div class="slds-col slds-size_5-of-12">
+                                                <lightning-input
+                                                    label="Stage Value"
+                                                    value={sc.stageValue}
+                                                    data-prop="stageValue"
+                                                    data-sc-idx={scIdx}
+                                                    onchange={handleStageConfigChange}>
+                                                </lightning-input>
+                                            </div>
+                                            <div class="slds-col slds-size_5-of-12">
+                                                <lightning-combobox
+                                                    label="Visibility"
+                                                    value={sc.visibility}
+                                                    options={visibilityOptions}
+                                                    data-prop="visibility"
+                                                    data-sc-idx={scIdx}
+                                                    onchange={handleStageConfigChange}>
+                                                </lightning-combobox>
+                                            </div>
+                                            <div class="slds-col slds-size_2-of-12 slds-align-bottom">
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    variant="bare"
+                                                    alternative-text="Remove"
+                                                    data-sc-idx={scIdx}
+                                                    onclick={handleRemoveStageConfig}>
+                                                </lightning-button-icon>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <lightning-button
+                                        label="Add Stage Config"
+                                        icon-name="utility:add"
+                                        onclick={handleAddStageConfig}>
+                                    </lightning-button>
+                                </div>
+                            </template>
+
+                            <!-- Validation Tab -->
+                            <template lwc:if={tabValidation}>
+                                <div class="slds-tabs_default__content slds-show slds-p-top_small">
+                                    <div class="slds-grid slds-gutters slds-wrap">
+                                        <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                            <lightning-input
+                                                type="checkbox"
+                                                label="Required in Layout"
+                                                checked={activeField.isRequiredLayout}
+                                                data-prop="isRequiredLayout"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                            <lightning-input
+                                                label="Regex Pattern"
+                                                value={activeField.regexPattern}
+                                                data-prop="regexPattern"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                            <lightning-input
+                                                label="Regex Error Message"
+                                                value={activeField.regexErrorMessage}
+                                                data-prop="regexErrorMessage"
+                                                onchange={handleFieldPropChange}>
+                                            </lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Permissions Tab -->
+                            <template lwc:if={tabPermissions}>
+                                <div class="slds-tabs_default__content slds-show slds-p-top_small">
+                                    <h4 class="slds-text-title_caps slds-m-bottom_small">Picklist Permissions</h4>
+                                    <template for:each={activeField.picklistPermissions} for:item="pp" for:index="ppIdx">
+                                        <div key={pp._uid} class="slds-grid slds-gutters slds-m-bottom_small" data-pp-idx={ppIdx}>
+                                            <div class="slds-col slds-size_5-of-12">
+                                                <lightning-input
+                                                    label="Picklist Value"
+                                                    value={pp.picklistValue}
+                                                    data-prop="picklistValue"
+                                                    data-pp-idx={ppIdx}
+                                                    onchange={handlePicklistPermissionChange}>
+                                                </lightning-input>
+                                            </div>
+                                            <div class="slds-col slds-size_5-of-12">
+                                                <lightning-input
+                                                    label="Custom Permission"
+                                                    value={pp.customPermissionApiName}
+                                                    data-prop="customPermissionApiName"
+                                                    data-pp-idx={ppIdx}
+                                                    onchange={handlePicklistPermissionChange}>
+                                                </lightning-input>
+                                            </div>
+                                            <div class="slds-col slds-size_2-of-12 slds-align-bottom">
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    variant="bare"
+                                                    alternative-text="Remove"
+                                                    data-pp-idx={ppIdx}
+                                                    onclick={handleRemovePicklistPermission}>
+                                                </lightning-button-icon>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <lightning-button
+                                        label="Add Permission"
+                                        icon-name="utility:add"
+                                        onclick={handleAddPicklistPermission}>
+                                    </lightning-button>
+                                </div>
+                            </template>
+
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="slds-align_absolute-center slds-text-color_weak" style="height: 200px;">
+                            <p>Select a field from the list to edit.</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="slds-m-top_medium">
+                <lightning-button
+                    variant="brand"
+                    label={labels.save}
+                    disabled={isSaveDisabled}
+                    onclick={handleSave}>
+                </lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+</template>

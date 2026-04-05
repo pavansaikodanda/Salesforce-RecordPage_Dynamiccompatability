@@ -1,0 +1,114 @@
+<template>
+    <lightning-card title="Object Mapping Configuration" icon-name="standard:custom_object">
+        <template lwc:if={isLoading}>
+            <lightning-spinner alternative-text={labels.loading} size="medium"></lightning-spinner>
+        </template>
+
+        <template lwc:if={errorMessage}>
+            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-around_small" role="alert">
+                <p>{errorMessage}</p>
+            </div>
+        </template>
+
+        <div class="slds-p-around_medium">
+            <div class="slds-grid slds-gutters slds-wrap">
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        label="Mapping Name"
+                        value={formData.Name}
+                        data-field="Name"
+                        onchange={handleFieldChange}>
+                    </lightning-input>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        label="Developer Name"
+                        value={formData.Developer_Name__c}
+                        data-field="Developer_Name__c"
+                        onchange={handleFieldChange}>
+                    </lightning-input>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-combobox
+                        label="Object"
+                        value={formData.Object_API_Name__c}
+                        options={objectOptions}
+                        placeholder={labels.selectObject}
+                        data-field="Object_API_Name__c"
+                        onchange={handleFieldChange}>
+                    </lightning-combobox>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-combobox
+                        label="Page Layout"
+                        value={formData.Page_Layout_ID__c}
+                        options={layoutOptions}
+                        placeholder={labels.selectLayout}
+                        data-field="Page_Layout_ID__c"
+                        onchange={handleFieldChange}>
+                    </lightning-combobox>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        label="Stage Picklist Field"
+                        value={formData.Stage_Picklist_Field__c}
+                        data-field="Stage_Picklist_Field__c"
+                        onchange={handleFieldChange}>
+                    </lightning-input>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-combobox
+                        label="Stage Order Source"
+                        value={formData.Stage_Order_Source__c}
+                        options={stageOrderSourceOptions}
+                        data-field="Stage_Order_Source__c"
+                        onchange={handleFieldChange}>
+                    </lightning-combobox>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        type="checkbox"
+                        label="Enforce Path Order"
+                        checked={formData.Enforce_Path_Order__c}
+                        data-field="Enforce_Path_Order__c"
+                        onchange={handleFieldChange}>
+                    </lightning-input>
+                </div>
+
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        type="checkbox"
+                        label="Is Active"
+                        checked={formData.Is_Active__c}
+                        data-field="Is_Active__c"
+                        onchange={handleFieldChange}>
+                    </lightning-input>
+                </div>
+
+            </div>
+
+            <div class="slds-m-top_medium">
+                <lightning-button
+                    variant="brand"
+                    label={labels.save}
+                    onclick={handleSave}
+                    class="slds-m-right_small">
+                </lightning-button>
+                <lightning-button
+                    variant="neutral"
+                    label={labels.sync}
+                    icon-name="utility:sync"
+                    disabled={isSyncing}
+                    onclick={handleSync}>
+                </lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+</template>

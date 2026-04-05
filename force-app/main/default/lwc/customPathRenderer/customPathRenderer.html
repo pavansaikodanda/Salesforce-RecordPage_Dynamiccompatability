@@ -1,0 +1,51 @@
+<template>
+    <template lwc:if={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+            <p>{errorMessage}</p>
+        </div>
+    </template>
+
+    <template lwc:else>
+        <div class="slds-path">
+            <div class="slds-grid slds-path__track">
+                <div class="slds-grid slds-path__scroller-container">
+                    <div class="slds-path__scroller">
+                        <div class="slds-path__scroller_inner">
+                            <ul class="slds-path__nav" role="listbox">
+                                <template for:each={stages} for:item="stage">
+                                    <li
+                                        key={stage.stageValue}
+                                        class={stage.cssClass}
+                                        role="presentation"
+                                        data-stage={stage.stageValue}
+                                        onclick={handleStageClick}>
+                                        <a class="slds-path__link" role="option" tabindex="0">
+                                            <span class="slds-path__stage">
+                                                <lightning-icon
+                                                    icon-name="utility:check"
+                                                    size="x-small"
+                                                    alternative-text="Stage complete">
+                                                </lightning-icon>
+                                            </span>
+                                            <span class="slds-path__title">{stage.stageLabel}</span>
+                                        </a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template lwc:if={guidanceText}>
+            <div class="slds-box slds-theme_shade slds-m-top_small">
+                <p class="slds-text-body_regular">{guidanceText}</p>
+            </div>
+        </template>
+    </template>
+</template>

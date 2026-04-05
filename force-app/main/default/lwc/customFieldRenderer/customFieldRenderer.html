@@ -1,0 +1,130 @@
+<template>
+    <!-- Text / Email / URL / Phone -->
+    <template lwc:if={isText}>
+        <template lwc:if={isTextArea}>
+            <lightning-textarea
+                label={fieldLabel}
+                value={stringValue}
+                required={required}
+                disabled={disabled}
+                message-when-value-missing={error}
+                onchange={handleTextChange}>
+            </lightning-textarea>
+        </template>
+        <template lwc:else>
+            <lightning-input
+                type={inputType}
+                label={fieldLabel}
+                value={stringValue}
+                required={required}
+                disabled={disabled}
+                message-when-value-missing={error}
+                onchange={handleTextChange}>
+            </lightning-input>
+        </template>
+    </template>
+
+    <!-- Picklist -->
+    <template lwc:elseif={isPicklist}>
+        <lightning-combobox
+            label={fieldLabel}
+            value={stringValue}
+            options={picklistOptions}
+            required={required}
+            disabled={disabled}
+            message-when-value-missing={error}
+            onchange={handlePicklistChange}>
+        </lightning-combobox>
+    </template>
+
+    <!-- Multi-Picklist -->
+    <template lwc:elseif={isMultiPicklist}>
+        <lightning-dual-listbox
+            label={fieldLabel}
+            options={picklistOptions}
+            value={stringValue}
+            required={required}
+            disabled={disabled}
+            onchange={handlePicklistChange}>
+        </lightning-dual-listbox>
+    </template>
+
+    <!-- Boolean / Checkbox -->
+    <template lwc:elseif={isBoolean}>
+        <lightning-input
+            type="checkbox"
+            label={fieldLabel}
+            checked={booleanValue}
+            disabled={disabled}
+            onchange={handleBooleanChange}>
+        </lightning-input>
+    </template>
+
+    <!-- Date -->
+    <template lwc:elseif={isDate}>
+        <lightning-input
+            type="date"
+            label={fieldLabel}
+            value={stringValue}
+            required={required}
+            disabled={disabled}
+            message-when-value-missing={error}
+            onchange={handleDateChange}>
+        </lightning-input>
+    </template>
+
+    <!-- DateTime -->
+    <template lwc:elseif={isDateTime}>
+        <lightning-input
+            type="datetime"
+            label={fieldLabel}
+            value={stringValue}
+            required={required}
+            disabled={disabled}
+            message-when-value-missing={error}
+            onchange={handleDateChange}>
+        </lightning-input>
+    </template>
+
+    <!-- Number / Currency / Percent -->
+    <template lwc:elseif={isNumber}>
+        <lightning-input
+            type="number"
+            label={fieldLabel}
+            value={numberValue}
+            formatter={formatter}
+            required={required}
+            disabled={disabled}
+            message-when-value-missing={error}
+            onchange={handleNumberChange}>
+        </lightning-input>
+    </template>
+
+    <!-- Reference / Lookup -->
+    <template lwc:elseif={isReference}>
+        <lightning-record-picker
+            label={fieldLabel}
+            object-api-name={referenceObjectName}
+            value={stringValue}
+            required={required}
+            disabled={disabled}
+            onchange={handleReferenceChange}>
+        </lightning-record-picker>
+    </template>
+
+    <!-- Fallback -->
+    <template lwc:else>
+        <lightning-input
+            type="text"
+            label={fieldLabel}
+            value={stringValue}
+            required={required}
+            disabled={disabled}
+            onchange={handleTextChange}>
+        </lightning-input>
+    </template>
+
+    <template lwc:if={error}>
+        <p class="slds-form-error">{error}</p>
+    </template>
+</template>

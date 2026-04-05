@@ -13,6 +13,9 @@ public class FormWrappers {
         @AuraEnabled public String fieldApiName;
         @AuraEnabled public String labelOverride;
         @AuraEnabled public String fieldType;
+        @AuraEnabled public String fieldSubtype;
+        @AuraEnabled public String addressGroup;
+        @AuraEnabled public Boolean isReadOnly;
         @AuraEnabled public String referenceTo;
         @AuraEnabled public String sectionLabel;
         @AuraEnabled public Integer displayOrder;
@@ -75,5 +78,11 @@ public class FormWrappers {
     public class LayoutWrapper {
         @AuraEnabled public String id;
         @AuraEnabled public String name;
+    }
+
+    public class PicklistValueWrapper {
+        @AuraEnabled public String value;
+        @AuraEnabled public String label;
+        @AuraEnabled public Boolean isDefault;
     }
 }
