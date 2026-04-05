@@ -25,6 +25,25 @@ public class FieldSyncController {
         ];
 
         String nc = System.Label.Tooling_API_Named_Credential;
+
+        // Verify the layout belongs to the configured object
+        String verifyQuery = 'SELECT Id FROM Layout WHERE Id = \''
+            + String.escapeSingleQuotes(mapping.Page_Layout_ID__c)
+            + '\' AND EntityDefinition.QualifiedApiName = \''
+            + String.escapeSingleQuotes(mapping.Object_API_Name__c) + '\'';
+        String verifyEndpoint = 'callout:' + nc + '/services/data/v66.0/tooling/query?q='
+            + EncodingUtil.urlEncode(verifyQuery, 'UTF-8');
+        HttpRequest verifyReq = new HttpRequest();
+        verifyReq.setMethod('GET');
+        verifyReq.setEndpoint(verifyEndpoint);
+        HttpResponse verifyRes = new Http().send(verifyReq);
+        Map<String, Object> verifyBody = (Map<String, Object>) JSON.deserializeUntyped(verifyRes.getBody());
+        List<Object> verifyRecords = (List<Object>) verifyBody.get('records');
+        if (verifyRecords == null || verifyRecords.isEmpty()) {
+            throw new AuraHandledException('Layout does not belong to object '
+                + mapping.Object_API_Name__c + '. Please re-select the layout.');
+        }
+
         String endpoint = 'callout:' + nc + '/services/data/v66.0/tooling/sobjects/Layout/'
             + mapping.Page_Layout_ID__c;
 
@@ -94,6 +113,7 @@ public class FieldSyncController {
 
             Boolean isAlwaysRequired = ALWAYS_REQUIRED_READONLY.contains(fieldNameLower);
             Schema.SObjectField sof = schemaFields.get(fieldNameLower);
+            if (sof == null && !isAlwaysRequired) continue;
             Boolean isReadOnly = isAlwaysRequired;
 
             if (!isAlwaysRequired && sof != null) {
