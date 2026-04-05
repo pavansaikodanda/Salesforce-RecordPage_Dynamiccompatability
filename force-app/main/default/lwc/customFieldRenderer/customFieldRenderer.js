@@ -47,11 +47,17 @@ export default class CustomFieldRenderer extends LightningElement {
     }
 
     get picklistOptions() {
-        if (!this.field?.picklistPermissions?.length) return [];
+        const allValues = (this.field?.picklistValues || []).map(pv => ({ label: pv.label, value: pv.value }));
+        const perms = this.field?.picklistPermissions || [];
+
+        if (!perms.length) return allValues;
+
         const userPerms = this._userPermissions || [];
-        return this.field.picklistPermissions
+        const filtered = perms
             .filter(p => !p.customPermissionApiName || userPerms.includes(p.customPermissionApiName))
             .map(p => ({ label: p.picklistValue, value: p.picklistValue }));
+
+        return filtered.length ? filtered : allValues;
     }
 
     @api userPermissions = [];

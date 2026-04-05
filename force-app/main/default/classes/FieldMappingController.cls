@@ -7,7 +7,7 @@ public class FieldMappingController {
         for (Custom_Field_Mapping__c fm : [
             SELECT Id, Field_API_Name__c, Field_Label_Override__c,
                 Field_Type__c, Field_Subtype__c, Address_Group__c,
-                Is_Read_Only__c, Reference_To__c, Section_Label__c,
+                Is_Read_Only__c, Is_Always_Required__c, Reference_To__c, Section_Label__c,
                 Display_Order__c, Default_Visibility__c,
                 Is_Required_Layout__c, Regex_Pattern__c,
                 Regex_Error_Message__c, Is_Active__c,
@@ -24,6 +24,7 @@ public class FieldMappingController {
             fw.fieldSubtype = fm.Field_Subtype__c;
             fw.addressGroup = fm.Address_Group__c;
             fw.isReadOnly = fm.Is_Read_Only__c;
+            fw.isAlwaysRequired = fm.Is_Always_Required__c;
             fw.referenceTo = fm.Reference_To__c;
             fw.sectionLabel = fm.Section_Label__c;
             fw.displayOrder = fm.Display_Order__c != null ? Integer.valueOf(fm.Display_Order__c) : null;

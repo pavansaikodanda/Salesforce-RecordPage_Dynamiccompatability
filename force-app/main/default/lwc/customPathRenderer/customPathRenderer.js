@@ -94,14 +94,26 @@ export default class CustomPathRenderer extends LightningElement {
 
     _isTransitionAllowed(from, to) {
         if (!from) return true;
-        if (!this.pathConfig?.enforceOrder) return true;
+
+        const stages = this.pathConfig?.stages || [];
+        const fromIdx = stages.findIndex(s => s.stageValue === from);
+        const toIdx = stages.findIndex(s => s.stageValue === to);
+        const isBackward = toIdx < fromIdx;
 
         const transitions = this.pathConfig?.transitions || [];
+
+        // Backward moves always check the transitions list
+        if (isBackward) {
+            if (!transitions.length) return false;
+            const match = transitions.find(t => t.fromStage === from && t.toStage === to);
+            return match ? match.isAllowed : false;
+        }
+
+        // Forward moves: if enforceOrder is off, always allow
+        if (!this.pathConfig?.enforceOrder) return true;
+
+        // Forward moves with enforceOrder: check transitions list, else require sequential
         if (!transitions.length) {
-            // No transitions defined — allow in-order moves only
-            const stages = this.pathConfig?.stages || [];
-            const fromIdx = stages.findIndex(s => s.stageValue === from);
-            const toIdx = stages.findIndex(s => s.stageValue === to);
             return toIdx === fromIdx + 1;
         }
 

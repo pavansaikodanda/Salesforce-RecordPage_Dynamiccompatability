@@ -61,7 +61,7 @@
                         <!-- Tabs -->
                         <div class="slds-tabs_default">
                             <ul class="slds-tabs_default__nav" role="tablist">
-                                <template for:each={tabs} for:item="tab">
+                                <template for:each={activeTabs} for:item="tab">
                                     <li
                                         key={tab}
                                         class="slds-tabs_default__item"
@@ -76,11 +76,19 @@
                             <!-- General Tab -->
                             <template lwc:if={tabGeneral}>
                                 <div class="slds-tabs_default__content slds-show slds-p-top_small">
+                                    <template lwc:if={activeField.isAlwaysRequired}>
+                                        <div class="slds-box slds-theme_shade slds-m-bottom_small">
+                                            <p class="slds-text-body_small slds-text-color_weak">
+                                                This is a system-required field. Only display order can be changed.
+                                            </p>
+                                        </div>
+                                    </template>
                                     <div class="slds-grid slds-gutters slds-wrap">
                                         <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
                                             <lightning-input
                                                 label="Label Override"
                                                 value={activeField.labelOverride}
+                                                disabled={activeField.isAlwaysRequired}
                                                 data-prop="labelOverride"
                                                 onchange={handleFieldPropChange}>
                                             </lightning-input>
@@ -89,6 +97,7 @@
                                             <lightning-input
                                                 label="Section Label"
                                                 value={activeField.sectionLabel}
+                                                disabled={activeField.isAlwaysRequired}
                                                 data-prop="sectionLabel"
                                                 onchange={handleFieldPropChange}>
                                             </lightning-input>
@@ -107,6 +116,7 @@
                                                 label="Field Subtype"
                                                 value={activeField.fieldSubtype}
                                                 options={fieldSubtypeOptions}
+                                                disabled={activeField.isAlwaysRequired}
                                                 data-prop="fieldSubtype"
                                                 onchange={handleFieldPropChange}>
                                             </lightning-combobox>
@@ -115,24 +125,36 @@
                                             <lightning-input
                                                 label="Address Group"
                                                 value={activeField.addressGroup}
+                                                disabled={activeField.isAlwaysRequired}
                                                 data-prop="addressGroup"
                                                 onchange={handleFieldPropChange}>
                                             </lightning-input>
                                         </div>
                                         <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
-                                            <lightning-input
-                                                type="checkbox"
-                                                label="Read Only"
-                                                checked={activeField.isReadOnly}
-                                                data-prop="isReadOnly"
-                                                onchange={handleFieldPropChange}>
-                                            </lightning-input>
+                                            <template lwc:if={activeField.isAlwaysRequired}>
+                                                <div class="slds-form-element">
+                                                    <label class="slds-form-element__label">Required</label>
+                                                    <div class="slds-form-element__control">
+                                                        <span class="slds-badge slds-badge_lightest">Always Required</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template lwc:else>
+                                                <lightning-input
+                                                    type="checkbox"
+                                                    label="Read Only"
+                                                    checked={activeField.isReadOnly}
+                                                    data-prop="isReadOnly"
+                                                    onchange={handleFieldPropChange}>
+                                                </lightning-input>
+                                            </template>
                                         </div>
                                         <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
                                             <lightning-input
                                                 type="checkbox"
                                                 label="Is Active"
                                                 checked={activeField.isActive}
+                                                disabled={activeField.isAlwaysRequired}
                                                 data-prop="isActive"
                                                 onchange={handleFieldPropChange}>
                                             </lightning-input>

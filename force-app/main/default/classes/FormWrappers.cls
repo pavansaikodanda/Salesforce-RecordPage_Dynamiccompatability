@@ -24,6 +24,8 @@ public class FormWrappers {
         @AuraEnabled public String regexPattern;
         @AuraEnabled public String regexErrorMessage;
         @AuraEnabled public Object defaultValue;
+        @AuraEnabled public Boolean isAlwaysRequired;
+        @AuraEnabled public List<FormWrappers.PicklistValueWrapper> picklistValues;
         @AuraEnabled public List<StageConfigWrapper> stageConfigs;
         @AuraEnabled public List<PicklistPermissionWrapper> picklistPermissions;
     }

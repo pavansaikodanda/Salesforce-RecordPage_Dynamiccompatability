@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Always_Required__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>When true, this field is a system-required field synced from the layout. Read-only and required are locked.</description>
+    <externalId>false</externalId>
+    <label>Is Always Required</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

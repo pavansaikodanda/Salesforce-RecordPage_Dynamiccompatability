@@ -1,8 +1,11 @@
 public class FieldSyncController {
 
     private static final Set<String> SYSTEM_FIELD_EXCLUSIONS = new Set<String>{
-        'id', 'createddate', 'createdbyid', 'lastmodifieddate', 'lastmodifiedbyid',
-        'systemmodstamp', 'isdeleted', 'lastactivitydate', 'lastvieweddate', 'lastreferenceddate'
+        'id', 'systemmodstamp', 'isdeleted', 'lastactivitydate', 'lastvieweddate', 'lastreferenceddate'
+    };
+
+    private static final Set<String> ALWAYS_REQUIRED_READONLY = new Set<String>{
+        'createddate', 'createdbyid', 'lastmodifieddate', 'lastmodifiedbyid'
     };
 
     private static final Set<Schema.DisplayType> EXCLUDED_TYPES = new Set<Schema.DisplayType>{
@@ -64,6 +67,12 @@ public class FieldSyncController {
         Map<String, Schema.SObjectField> schemaFields = Schema.getGlobalDescribe()
             .get(mapping.Object_API_Name__c).getDescribe().fields.getMap();
 
+        // Always include the Name field if the object has one and it wasn't in the layout
+        Schema.SObjectField nameSof = schemaFields.get('name');
+        if (nameSof != null && !fieldToSection.containsKey('Name')) {
+            fieldToSection.put('Name', 'Information');
+        }
+
         // Load existing mappings into map by field API name
         Map<String, Custom_Field_Mapping__c> existingByApiName = new Map<String, Custom_Field_Mapping__c>();
         for (Custom_Field_Mapping__c cfm : [
@@ -80,12 +89,14 @@ public class FieldSyncController {
         Integer unchanged = 0;
 
         for (String fieldName : incomingFields) {
-            if (SYSTEM_FIELD_EXCLUSIONS.contains(fieldName.toLowerCase())) continue;
+            String fieldNameLower = fieldName.toLowerCase();
+            if (SYSTEM_FIELD_EXCLUSIONS.contains(fieldNameLower)) continue;
 
-            Schema.SObjectField sof = schemaFields.get(fieldName.toLowerCase());
-            Boolean isReadOnly = false;
+            Boolean isAlwaysRequired = ALWAYS_REQUIRED_READONLY.contains(fieldNameLower);
+            Schema.SObjectField sof = schemaFields.get(fieldNameLower);
+            Boolean isReadOnly = isAlwaysRequired;
 
-            if (sof != null) {
+            if (!isAlwaysRequired && sof != null) {
                 Schema.DescribeFieldResult dfr = sof.getDescribe();
 
                 if (EXCLUDED_TYPES.contains(dfr.getType())) continue;
@@ -102,12 +113,14 @@ public class FieldSyncController {
             } else {
                 String fieldType = 'Text';
                 String referenceTo = null;
-                Boolean isRequired = false;
+                Boolean isRequired = isAlwaysRequired;
 
                 if (sof != null) {
                     Schema.DescribeFieldResult dfr = sof.getDescribe();
                     fieldType = dfr.getType().name();
-                    isRequired = !dfr.isNillable() && !dfr.isDefaultedOnCreate();
+                    if (!isAlwaysRequired) {
+                        isRequired = !dfr.isNillable() && !dfr.isDefaultedOnCreate();
+                    }
                     List<Schema.SObjectType> refs = dfr.getReferenceTo();
                     if (!refs.isEmpty()) {
                         referenceTo = refs[0].getDescribe().getName();
@@ -120,6 +133,7 @@ public class FieldSyncController {
                     Field_Type__c = fieldType,
                     Is_Required_Layout__c = isRequired,
                     Is_Read_Only__c = isReadOnly,
+                    Is_Always_Required__c = isAlwaysRequired,
                     Reference_To__c = referenceTo,
                     Section_Label__c = fieldToSection.get(fieldName),
                     Default_Visibility__c = 'Visible',

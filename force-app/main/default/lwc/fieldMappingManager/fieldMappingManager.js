@@ -105,17 +105,22 @@ export default class FieldMappingManager extends LightningElement {
     }
 
     handleTabClick(event) {
-        this.activeTab = event.target.dataset.tab;
+        this.activeTab = event.currentTarget.dataset.tab;
     }
 
     isTabActive(tab) {
         return this.activeTab === tab;
     }
 
+    get activeTabs() {
+        if (this.activeField?.isAlwaysRequired) return ['General'];
+        return TABS;
+    }
+
     get tabGeneral() { return this.activeTab === 'General'; }
-    get tabVisibility() { return this.activeTab === 'Visibility'; }
-    get tabValidation() { return this.activeTab === 'Validation'; }
-    get tabPermissions() { return this.activeTab === 'Permissions'; }
+    get tabVisibility() { return this.activeTab === 'Visibility' && !this.activeField?.isAlwaysRequired; }
+    get tabValidation() { return this.activeTab === 'Validation' && !this.activeField?.isAlwaysRequired; }
+    get tabPermissions() { return this.activeTab === 'Permissions' && !this.activeField?.isAlwaysRequired; }
 
     handleFieldPropChange(event) {
         if (this.activeFieldIndex === null) return;
