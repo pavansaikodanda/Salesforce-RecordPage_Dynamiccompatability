@@ -7,6 +7,14 @@ export default class CustomFieldRenderer extends LightningElement {
     @api error;
     @api disabled = false;
 
+    @track _resolvedReferenceValue = null;
+
+    connectedCallback() {
+        Promise.resolve().then(() => {
+            this._resolvedReferenceValue = this.value || null;
+        });
+    }
+
     get isText() {
         const t = this._type;
         return t === 'STRING' || t === 'TEXTAREA' || t === 'URL' || t === 'EMAIL' || t === 'PHONE';
@@ -44,6 +52,10 @@ export default class CustomFieldRenderer extends LightningElement {
 
     get referenceObjectName() {
         return this.field?.referenceTo || 'Account';
+    }
+
+    get referenceValue() {
+        return this._resolvedReferenceValue || this.value || null;
     }
 
     get picklistOptions() {
