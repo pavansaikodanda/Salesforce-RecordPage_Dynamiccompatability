@@ -149,10 +149,10 @@ export default class CustomFieldRenderer extends LightningElement {
 
         if (!perms.length) return allValues;
 
-        const userPerms = this.userPermissions || [];
+        const userPerms = new Set(this.userPermissions || []);
         const allowedValues = new Set(
             perms
-                .filter(p => !p.customPermissionApiName || userPerms.includes(p.customPermissionApiName))
+                .filter(p => p.customPermissionApiName && userPerms.has(p.customPermissionApiName))
                 .map(p => p.picklistValue)
         );
 

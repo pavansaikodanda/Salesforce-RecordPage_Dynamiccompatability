@@ -321,7 +321,15 @@ export default class FieldMappingManager extends LightningElement {
             groupLabel: f.groupLabel ?? null,
             groupPrimary: f.groupPrimary ?? false,
             splitPattern: f.splitPattern ?? null,
-            helpText: f.helpText ?? null
+            helpText: f.helpText ?? null,
+            stageConfigs: (f.stageConfigs || []).map(sc => ({
+                stageValue: sc.stageValue,
+                visibility: sc.visibility
+            })),
+            picklistPermissions: (f.picklistPermissions || []).map(pp => ({
+                picklistValue: pp.picklistValue,
+                customPermissionApiName: pp.customPermissionApiName
+            }))
         }));
 
         saveFieldMappings({ objectMappingId: this.recordId, fieldMappingsJson: JSON.stringify(payload) })
