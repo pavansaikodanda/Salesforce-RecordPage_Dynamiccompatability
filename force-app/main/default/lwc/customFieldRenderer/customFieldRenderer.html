@@ -3,12 +3,12 @@
     <template lwc:if={isGroupedPrimary}>
         <lightning-input
             type="text"
-            label={groupedLabel}
+            label={fieldLabel}
             value={groupedDisplayValue}
             required={required}
             disabled={disabled}
-            message-when-value-missing={error}
-            onchange={handleGroupedChange}>
+            onchange={handleGroupedChange}
+            onblur={handleBlur}>
         </lightning-input>
         <template lwc:if={splitHint}>
             <p class="slds-text-body_small slds-m-top_xx-small" style="color: #c27400;">{splitHint}</p>
@@ -26,8 +26,8 @@
                 value={stringValue}
                 required={required}
                 disabled={disabled}
-                message-when-value-missing={error}
-                onchange={handleTextChange}>
+                onchange={handleTextChange}
+                onblur={handleBlur}>
             </lightning-textarea>
         </template>
         <template lwc:else>
@@ -37,8 +37,8 @@
                 value={stringValue}
                 required={required}
                 disabled={disabled}
-                message-when-value-missing={error}
-                onchange={handleTextChange}>
+                onchange={handleTextChange}
+                onblur={handleBlur}>
             </lightning-input>
         </template>
     </template>
@@ -51,8 +51,8 @@
             options={picklistOptions}
             required={required}
             disabled={disabled}
-            message-when-value-missing={error}
-            onchange={handlePicklistChange}>
+            onchange={handlePicklistChange}
+            onblur={handleBlur}>
         </lightning-combobox>
     </template>
 
@@ -87,8 +87,8 @@
             value={stringValue}
             required={required}
             disabled={disabled}
-            message-when-value-missing={error}
-            onchange={handleDateChange}>
+            onchange={handleDateChange}
+            onblur={handleBlur}>
         </lightning-input>
     </template>
 
@@ -100,8 +100,8 @@
             value={stringValue}
             required={required}
             disabled={disabled}
-            message-when-value-missing={error}
-            onchange={handleDateChange}>
+            onchange={handleDateChange}
+            onblur={handleBlur}>
         </lightning-input>
     </template>
 
@@ -114,8 +114,8 @@
             formatter={formatter}
             required={required}
             disabled={disabled}
-            message-when-value-missing={error}
-            onchange={handleNumberChange}>
+            onchange={handleNumberChange}
+            onblur={handleBlur}>
         </lightning-input>
     </template>
 
@@ -139,12 +139,9 @@
             value={stringValue}
             required={required}
             disabled={disabled}
-            onchange={handleTextChange}>
+            onchange={handleTextChange}
+            onblur={handleBlur}>
         </lightning-input>
-    </template>
-
-    <template lwc:if={error}>
-        <p class="slds-form-error">{error}</p>
     </template>
 
     <template lwc:if={helpText}>
