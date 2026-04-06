@@ -69,6 +69,7 @@ public class FieldMappingController {
     public static void saveFieldMappings(String objectMappingId, String fieldMappingsJson) {
         List<Object> rawList = (List<Object>) JSON.deserializeUntyped(fieldMappingsJson);
 
+        // Step 1 — Upsert Custom_Field_Mapping__c records
         List<Custom_Field_Mapping__c> existing = [
             SELECT Id, Field_API_Name__c FROM Custom_Field_Mapping__c
             WHERE Object_Mapping__c = :objectMappingId
@@ -79,12 +80,10 @@ public class FieldMappingController {
         }
 
         List<Custom_Field_Mapping__c> toUpsert = new List<Custom_Field_Mapping__c>();
-        Set<String> incomingApiNames = new Set<String>();
 
         for (Object item : rawList) {
             Map<String, Object> fm = (Map<String, Object>) item;
             String apiName = (String) fm.get('fieldApiName');
-            incomingApiNames.add(apiName);
 
             Custom_Field_Mapping__c cfm = new Custom_Field_Mapping__c();
             if (existingByApiName.containsKey(apiName)) {
@@ -118,35 +117,92 @@ public class FieldMappingController {
 
         if (!toUpsert.isEmpty()) upsert toUpsert;
 
-        // Rebuild id map after upsert so new records have their Ids
-        Map<String, Id> fieldMappingIdByApiName = new Map<String, Id>();
-        for (Custom_Field_Mapping__c cfm : toUpsert) {
-            fieldMappingIdByApiName.put(cfm.Field_API_Name__c, cfm.Id);
-        }
-
-        // --- Picklist Permission Mappings ---
-        Set<Id> fieldMappingIds = new Set<Id>(fieldMappingIdByApiName.values());
-
-        Map<String, Picklist_Permission_Mapping__c> existingPpByKey = new Map<String, Picklist_Permission_Mapping__c>();
-        for (Picklist_Permission_Mapping__c pp : [
-            SELECT Id, Field_Mapping__c, Picklist_Value__c, Custom_Permission_API_Name__c
-            FROM Picklist_Permission_Mapping__c
-            WHERE Field_Mapping__c IN :fieldMappingIds
+        // Step 2 — Build fresh Id map after upsert
+        Map<String, Id> freshIdByApiName = new Map<String, Id>();
+        for (Custom_Field_Mapping__c cfm : [
+            SELECT Id, Field_API_Name__c FROM Custom_Field_Mapping__c
+            WHERE Object_Mapping__c = :objectMappingId
         ]) {
-            existingPpByKey.put(pp.Field_Mapping__c + '|' + pp.Picklist_Value__c, pp);
+            freshIdByApiName.put(cfm.Field_API_Name__c, cfm.Id);
         }
 
-        List<Picklist_Permission_Mapping__c> ppToUpsert = new List<Picklist_Permission_Mapping__c>();
-        Set<String> incomingPpKeys = new Set<String>();
+        Set<Id> allFieldMappingIds = new Set<Id>(freshIdByApiName.values());
+
+        // Step 3 — Handle Field_Stage_Config__c
+        List<Field_Stage_Config__c> existingStageConfigs = [
+            SELECT Id, Field_Mapping__c, Stage_Value__c
+            FROM Field_Stage_Config__c
+            WHERE Field_Mapping__c IN :allFieldMappingIds
+        ];
+        Map<String, Id> existingStageMap = new Map<String, Id>();
+        for (Field_Stage_Config__c sc : existingStageConfigs) {
+            existingStageMap.put(sc.Field_Mapping__c + '|' + sc.Stage_Value__c, sc.Id);
+        }
+
+        List<Field_Stage_Config__c> stagesToUpsert = new List<Field_Stage_Config__c>();
+        Set<String> incomingStageKeys = new Set<String>();
 
         for (Object item : rawList) {
             Map<String, Object> fm = (Map<String, Object>) item;
             String apiName = (String) fm.get('fieldApiName');
-            Id fieldMappingId = fieldMappingIdByApiName.get(apiName);
+            Id fieldMappingId = freshIdByApiName.get(apiName);
             if (fieldMappingId == null) continue;
 
-            List<Object> perms = (List<Object>) fm.get('picklistPermissions');
-            if (perms == null) continue;
+            List<Object> configs = fm.get('stageConfigs') != null
+                ? (List<Object>) fm.get('stageConfigs') : new List<Object>();
+
+            for (Object configObj : configs) {
+                Map<String, Object> sc = (Map<String, Object>) configObj;
+                String stageValue = (String) sc.get('stageValue');
+                if (String.isBlank(stageValue)) continue;
+
+                String key = fieldMappingId + '|' + stageValue;
+                incomingStageKeys.add(key);
+
+                Field_Stage_Config__c fsc = new Field_Stage_Config__c();
+                if (existingStageMap.containsKey(key)) {
+                    fsc.Id = existingStageMap.get(key);
+                } else {
+                    fsc.Field_Mapping__c = fieldMappingId;
+                    fsc.Stage_Value__c = stageValue;
+                }
+                if (sc.get('visibility') != null) fsc.Visibility__c = (String) sc.get('visibility');
+                stagesToUpsert.add(fsc);
+            }
+        }
+
+        List<Field_Stage_Config__c> stagesToDelete = new List<Field_Stage_Config__c>();
+        for (Field_Stage_Config__c sc : existingStageConfigs) {
+            if (!incomingStageKeys.contains(sc.Field_Mapping__c + '|' + sc.Stage_Value__c)) {
+                stagesToDelete.add(sc);
+            }
+        }
+
+        if (!stagesToUpsert.isEmpty()) upsert stagesToUpsert;
+        if (!stagesToDelete.isEmpty()) delete stagesToDelete;
+
+        // Step 4 — Handle Picklist_Permission_Mapping__c
+        List<Picklist_Permission_Mapping__c> existingPerms = [
+            SELECT Id, Field_Mapping__c, Picklist_Value__c
+            FROM Picklist_Permission_Mapping__c
+            WHERE Field_Mapping__c IN :allFieldMappingIds
+        ];
+        Map<String, Id> existingPermMap = new Map<String, Id>();
+        for (Picklist_Permission_Mapping__c pp : existingPerms) {
+            existingPermMap.put(pp.Field_Mapping__c + '|' + pp.Picklist_Value__c, pp.Id);
+        }
+
+        List<Picklist_Permission_Mapping__c> permsToUpsert = new List<Picklist_Permission_Mapping__c>();
+        Set<String> incomingPermKeys = new Set<String>();
+
+        for (Object item : rawList) {
+            Map<String, Object> fm = (Map<String, Object>) item;
+            String apiName = (String) fm.get('fieldApiName');
+            Id fieldMappingId = freshIdByApiName.get(apiName);
+            if (fieldMappingId == null) continue;
+
+            List<Object> perms = fm.get('picklistPermissions') != null
+                ? (List<Object>) fm.get('picklistPermissions') : new List<Object>();
 
             for (Object permObj : perms) {
                 Map<String, Object> perm = (Map<String, Object>) permObj;
@@ -154,75 +210,29 @@ public class FieldMappingController {
                 if (String.isBlank(picklistValue)) continue;
 
                 String key = fieldMappingId + '|' + picklistValue;
-                incomingPpKeys.add(key);
+                incomingPermKeys.add(key);
 
-                Picklist_Permission_Mapping__c pp = existingPpByKey.containsKey(key)
-                    ? existingPpByKey.get(key)
-                    : new Picklist_Permission_Mapping__c(
-                        Field_Mapping__c = fieldMappingId,
-                        Picklist_Value__c = picklistValue
-                    );
+                Picklist_Permission_Mapping__c pp = new Picklist_Permission_Mapping__c();
+                if (existingPermMap.containsKey(key)) {
+                    pp.Id = existingPermMap.get(key);
+                } else {
+                    pp.Field_Mapping__c = fieldMappingId;
+                    pp.Picklist_Value__c = picklistValue;
+                }
                 pp.Custom_Permission_API_Name__c = (String) perm.get('customPermissionApiName');
-                ppToUpsert.add(pp);
+                permsToUpsert.add(pp);
             }
         }
 
-        List<Picklist_Permission_Mapping__c> ppToDelete = new List<Picklist_Permission_Mapping__c>();
-        for (String key : existingPpByKey.keySet()) {
-            if (!incomingPpKeys.contains(key)) ppToDelete.add(existingPpByKey.get(key));
-        }
-
-        if (!ppToUpsert.isEmpty()) upsert ppToUpsert;
-        if (!ppToDelete.isEmpty()) delete ppToDelete;
-
-        // --- Field Stage Configs ---
-        Map<String, Field_Stage_Config__c> existingScByKey = new Map<String, Field_Stage_Config__c>();
-        for (Field_Stage_Config__c sc : [
-            SELECT Id, Field_Mapping__c, Stage_Value__c, Visibility__c
-            FROM Field_Stage_Config__c
-            WHERE Field_Mapping__c IN :fieldMappingIds
-        ]) {
-            existingScByKey.put(sc.Field_Mapping__c + '|' + sc.Stage_Value__c, sc);
-        }
-
-        List<Field_Stage_Config__c> scToUpsert = new List<Field_Stage_Config__c>();
-        Set<String> incomingScKeys = new Set<String>();
-
-        for (Object item : rawList) {
-            Map<String, Object> fm = (Map<String, Object>) item;
-            String apiName = (String) fm.get('fieldApiName');
-            Id fieldMappingId = fieldMappingIdByApiName.get(apiName);
-            if (fieldMappingId == null) continue;
-
-            List<Object> stages = (List<Object>) fm.get('stageConfigs');
-            if (stages == null) continue;
-
-            for (Object stageObj : stages) {
-                Map<String, Object> stage = (Map<String, Object>) stageObj;
-                String stageValue = (String) stage.get('stageValue');
-                if (String.isBlank(stageValue)) continue;
-
-                String key = fieldMappingId + '|' + stageValue;
-                incomingScKeys.add(key);
-
-                Field_Stage_Config__c sc = existingScByKey.containsKey(key)
-                    ? existingScByKey.get(key)
-                    : new Field_Stage_Config__c(
-                        Field_Mapping__c = fieldMappingId,
-                        Stage_Value__c = stageValue
-                    );
-                sc.Visibility__c = (String) stage.get('visibility');
-                scToUpsert.add(sc);
+        List<Picklist_Permission_Mapping__c> permsToDelete = new List<Picklist_Permission_Mapping__c>();
+        for (Picklist_Permission_Mapping__c pp : existingPerms) {
+            if (!incomingPermKeys.contains(pp.Field_Mapping__c + '|' + pp.Picklist_Value__c)) {
+                permsToDelete.add(pp);
             }
         }
 
-        List<Field_Stage_Config__c> scToDelete = new List<Field_Stage_Config__c>();
-        for (String key : existingScByKey.keySet()) {
-            if (!incomingScKeys.contains(key)) scToDelete.add(existingScByKey.get(key));
-        }
-
-        if (!scToUpsert.isEmpty()) upsert scToUpsert;
-        if (!scToDelete.isEmpty()) delete scToDelete;
+        if (!permsToUpsert.isEmpty()) upsert permsToUpsert;
+        if (!permsToDelete.isEmpty()) delete permsToDelete;
     }
 
     @AuraEnabled(cacheable=true)
